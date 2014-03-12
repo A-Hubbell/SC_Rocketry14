@@ -29,7 +29,7 @@ float bmpData[4] = {0,0,0,0};  // Altitude  Temperature  Pressure
 float vertAccel = 0;
 
 const int LED_PIN = 0;
-const int LAUNCH_THRESH = 300; //500 ft altitude detected, switch from mode 1 to mode 2
+const int LAUNCH_THRESH = 300; //300 ft altitude detected, switch from mode 1 to mode 2
 const int DROGUE_EMATCH_PIN = 1; //Pin connected to drogue parachute e-match
 const int MAIN_EMATCH_PIN = 2; //Pin connected to main parachute e-match
 const int APOGEE_ACCEL_THRESH = 3; // Acceleration upper threshold for apogee detection
@@ -154,6 +154,20 @@ void loop()
   Serial1.println(timer);
   Serial2.print("MAIN CHUTE DEPLOYMENT SIGNAL SENT    ");
   Serial2.println(timer);
+
+
+  //----------------------------------------------------------------------------------------------------- 
+  //Continue logging all sensor data until turned off
+ 
+  while(true)
+  {
+    //Read 9-DOF data
+    getBMP(); //Read BMP180 data
+    getGPS(); //Read GPS data
+    dataSDOut(); //Transmit data to SD logger, then Xbee
+    dataXbeeOut();
+  } 
+ 
 
  
 }
