@@ -46,8 +46,8 @@
             this.label15 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
+            this.airpressurelbl = new System.Windows.Forms.Label();
+            this.altitudelbl = new System.Windows.Forms.Label();
             this.maxAltitudelbl = new System.Windows.Forms.Label();
             this.rolllbl = new System.Windows.Forms.Label();
             this.pitchlbl = new System.Windows.Forms.Label();
@@ -70,6 +70,9 @@
             this.comtxt = new System.Windows.Forms.TextBox();
             this.combutton = new System.Windows.Forms.Button();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.pressuretxt = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -239,8 +242,8 @@
             this.panel1.Controls.Add(this.label15);
             this.panel1.Controls.Add(this.label14);
             this.panel1.Controls.Add(this.label9);
-            this.panel1.Controls.Add(this.label11);
-            this.panel1.Controls.Add(this.label10);
+            this.panel1.Controls.Add(this.airpressurelbl);
+            this.panel1.Controls.Add(this.altitudelbl);
             this.panel1.Controls.Add(this.maxAltitudelbl);
             this.panel1.Controls.Add(this.rolllbl);
             this.panel1.Controls.Add(this.pitchlbl);
@@ -299,29 +302,29 @@
             this.label9.TabIndex = 27;
             this.label9.Text = "Max altitude:";
             // 
-            // label11
+            // airpressurelbl
             // 
-            this.label11.AutoSize = true;
-            this.label11.BackColor = System.Drawing.Color.Transparent;
-            this.label11.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label11.ForeColor = System.Drawing.Color.Lime;
-            this.label11.Location = new System.Drawing.Point(177, 349);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(21, 21);
-            this.label11.TabIndex = 26;
-            this.label11.Text = "0";
+            this.airpressurelbl.AutoSize = true;
+            this.airpressurelbl.BackColor = System.Drawing.Color.Transparent;
+            this.airpressurelbl.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.airpressurelbl.ForeColor = System.Drawing.Color.Lime;
+            this.airpressurelbl.Location = new System.Drawing.Point(177, 349);
+            this.airpressurelbl.Name = "airpressurelbl";
+            this.airpressurelbl.Size = new System.Drawing.Size(21, 21);
+            this.airpressurelbl.TabIndex = 26;
+            this.airpressurelbl.Text = "0";
             // 
-            // label10
+            // altitudelbl
             // 
-            this.label10.AutoSize = true;
-            this.label10.BackColor = System.Drawing.Color.Transparent;
-            this.label10.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.ForeColor = System.Drawing.Color.Lime;
-            this.label10.Location = new System.Drawing.Point(177, 312);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(21, 21);
-            this.label10.TabIndex = 25;
-            this.label10.Text = "0";
+            this.altitudelbl.AutoSize = true;
+            this.altitudelbl.BackColor = System.Drawing.Color.Transparent;
+            this.altitudelbl.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.altitudelbl.ForeColor = System.Drawing.Color.Lime;
+            this.altitudelbl.Location = new System.Drawing.Point(177, 312);
+            this.altitudelbl.Name = "altitudelbl";
+            this.altitudelbl.Size = new System.Drawing.Size(21, 21);
+            this.altitudelbl.TabIndex = 25;
+            this.altitudelbl.Text = "0";
             // 
             // maxAltitudelbl
             // 
@@ -557,6 +560,7 @@
             this.comtxt.Name = "comtxt";
             this.comtxt.Size = new System.Drawing.Size(75, 20);
             this.comtxt.TabIndex = 18;
+            this.comtxt.Text = "COM6";
             // 
             // combutton
             // 
@@ -580,12 +584,45 @@
             this.checkBox1.Text = "Enable manual parachute deploy";
             this.checkBox1.UseVisualStyleBackColor = true;
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(104, 282);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 23;
+            this.button2.Text = "Connect";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // pressuretxt
+            // 
+            this.pressuretxt.Location = new System.Drawing.Point(23, 283);
+            this.pressuretxt.Name = "pressuretxt";
+            this.pressuretxt.Size = new System.Drawing.Size(75, 20);
+            this.pressuretxt.TabIndex = 22;
+            this.pressuretxt.Text = "1013.25";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.BackColor = System.Drawing.Color.Transparent;
+            this.label10.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.ForeColor = System.Drawing.Color.Lime;
+            this.label10.Location = new System.Drawing.Point(19, 259);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(329, 21);
+            this.label10.TabIndex = 21;
+            this.label10.Text = "Enter Sea Level Pressure(hPA)";
+            // 
             // RocketGroundControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(760, 504);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.pressuretxt);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.combutton);
             this.Controls.Add(this.comtxt);
@@ -636,8 +673,8 @@
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label airpressurelbl;
+        private System.Windows.Forms.Label altitudelbl;
         private System.Windows.Forms.Label maxAltitudelbl;
         private System.Windows.Forms.Label rolllbl;
         private System.Windows.Forms.Label pitchlbl;
@@ -660,6 +697,9 @@
         private System.Windows.Forms.TextBox comtxt;
         private System.Windows.Forms.Button combutton;
         private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.TextBox pressuretxt;
+        private System.Windows.Forms.Label label10;
 
     }
 }

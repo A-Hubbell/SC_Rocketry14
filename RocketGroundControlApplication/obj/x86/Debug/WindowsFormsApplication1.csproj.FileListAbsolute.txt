@@ -5,3 +5,10 @@ C:\Users\Harley\Desktop\WindowsFormsApplication1\obj\x86\Debug\WindowsFormsAppli
 C:\Users\Harley\Desktop\WindowsFormsApplication1\obj\x86\Debug\WindowsFormsApplication1.exe
 C:\Users\Harley\Desktop\WindowsFormsApplication1\obj\x86\Debug\WindowsFormsApplication1.pdb
 C:\Users\Harley\Desktop\WindowsFormsApplication1\obj\x86\Debug\WindowsFormsApplication1.RocketGroundControl.resources
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\obj\x86\Debug\WindowsFormsApplication1.exe
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\obj\x86\Debug\WindowsFormsApplication1.pdb
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\bin\Debug\WindowsFormsApplication1.exe
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\bin\Debug\WindowsFormsApplication1.pdb
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\obj\x86\Debug\WindowsFormsApplication1.RocketGroundControl.resources
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\obj\x86\Debug\WindowsFormsApplication1.Properties.Resources.resources
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\obj\x86\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
