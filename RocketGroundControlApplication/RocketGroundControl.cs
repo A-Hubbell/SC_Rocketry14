@@ -59,10 +59,18 @@ namespace WindowsFormsApplication1
         }
         private void combutton_Click(object sender, EventArgs e)
         {
+
             port = new SerialPort(comtxt.Text, 9600);
             port.DtrEnable = false;
             port.RtsEnable = false;
-            port.Open();
+            try
+            {
+                port.Open();
+            }
+            catch
+            {
+                MessageBox.Show("Invalid COM port.");
+            }
             port.DataReceived += new SerialDataReceivedEventHandler(portDataReceived);
         }
         private void button2_Click(object sender, EventArgs e)
