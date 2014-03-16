@@ -1,0 +1,5 @@
+
+Notes for testing 10 Dof sensor
+
+Please install the FreeSixIMU and HMC5883L library.
+The Sample_10Dof sketch is a simple sample code merged all the sensor reading codes.
