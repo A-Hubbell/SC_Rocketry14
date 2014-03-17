@@ -5,3 +5,8 @@ C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\obj\
 C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\bin\Debug\WindowsFormsApplication1.exe
 C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\bin\Debug\WindowsFormsApplication1.pdb
 C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\obj\x86\Debug\WindowsFormsApplication1.RocketGroundControl.resources
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\obj\x86\Debug\RocketGroundControl.csprojResolveAssemblyReference.cache
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\bin\Debug\WindowsFormsApplication1.exe.manifest
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\bin\Debug\WindowsFormsApplication1.application
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\obj\x86\Debug\WindowsFormsApplication1.exe.manifest
+C:\Users\Harley\Desktop\GitHub\SC_Rocketry14\RocketGroundControlApplication\obj\x86\Debug\WindowsFormsApplication1.application

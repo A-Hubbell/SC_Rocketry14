@@ -15,6 +15,7 @@ namespace WindowsFormsApplication1
     {
         SerialPort port;
         string[] dataArray;
+        public bool connected = false;
         delegate void SetTextCallback();
         public RocketGroundControl()
         {
@@ -48,34 +49,76 @@ namespace WindowsFormsApplication1
             else
             {
                 if (dataArray[1] == "Offline")
+                {
                     barometriclbl.Text = "Offline";
+                    barometriclbl.ForeColor = Color.Red;
+                }
                 else
                 {
                     barometriclbl.Text = "Online";
                     airpressurelbl.Text = dataArray[2];
                     altitudelbl.Text = dataArray[4];
+                    barometriclbl.ForeColor = Color.Lime;
                 }
             }
         }
         private void combutton_Click(object sender, EventArgs e)
         {
-
-            port = new SerialPort(comtxt.Text, 9600);
-            port.DtrEnable = false;
-            port.RtsEnable = false;
-            try
+            if (!connected)
             {
-                port.Open();
+                port = new SerialPort(comtxt.Text, 9600);
+                port.DtrEnable = false;
+                port.RtsEnable = false;
+                try
+                {
+                    port.Open();
+                    connected = true;
+                    combutton.Text = "Disconnect";
+                    comtxt.Enabled = false;
+                    parachuteCheckBox.Enabled = true;
+                    parachuteTextBox.Enabled = true;
+                    deployButton.Enabled = true;
+                    pressureSend.Enabled = true;
+                    pressureTextBox.Enabled = true;
+                }
+                catch
+                {
+                    MessageBox.Show("Invalid COM port.");
+                }
+                port.DataReceived += new SerialDataReceivedEventHandler(portDataReceived);
             }
-            catch
+            else
             {
-                MessageBox.Show("Invalid COM port.");
+                try
+                {
+                    port.DataReceived -= new SerialDataReceivedEventHandler(portDataReceived);
+                    port.Close();
+                    combutton.Text = "Connect";
+                    connected = false;
+                    comtxt.Enabled = true;
+                    parachuteCheckBox.Enabled = false;
+                    parachuteTextBox.Enabled = false;
+                    deployButton.Enabled = false;
+                    pressureSend.Enabled = false;
+                    pressureTextBox.Enabled = false;
+                }
+                catch (Exception el)
+                {
+                    MessageBox.Show(el.InnerException.ToString());
+                }
             }
-            port.DataReceived += new SerialDataReceivedEventHandler(portDataReceived);
         }
         private void button2_Click(object sender, EventArgs e)
         {
-            port.Write("pressure:" + pressuretxt.Text);
+            port.Write("pressure:" + pressureTextBox.Text);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (parachuteCheckBox.Checked && parachuteTextBox.Text == "manual")
+            {
+                port.Write("LaunchPar");
+            }
         }
 
 

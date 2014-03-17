@@ -40,8 +40,8 @@
             this.accelerometerlbl = new System.Windows.Forms.Label();
             this.sensorStatuslbl = new System.Windows.Forms.Label();
             this.rocketstatuslbl = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.deployButton = new System.Windows.Forms.Button();
+            this.parachuteTextBox = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label15 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
@@ -69,9 +69,9 @@
             this.label17 = new System.Windows.Forms.Label();
             this.comtxt = new System.Windows.Forms.TextBox();
             this.combutton = new System.Windows.Forms.Button();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.button2 = new System.Windows.Forms.Button();
-            this.pressuretxt = new System.Windows.Forms.TextBox();
+            this.parachuteCheckBox = new System.Windows.Forms.CheckBox();
+            this.pressureSend = new System.Windows.Forms.Button();
+            this.pressureTextBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -220,21 +220,24 @@
             this.rocketstatuslbl.TabIndex = 7;
             this.rocketstatuslbl.Text = "Launch Mode";
             // 
-            // button1
+            // deployButton
             // 
-            this.button1.Location = new System.Drawing.Point(112, 469);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 13;
-            this.button1.Text = "Deploy";
-            this.button1.UseVisualStyleBackColor = true;
+            this.deployButton.Enabled = false;
+            this.deployButton.Location = new System.Drawing.Point(112, 469);
+            this.deployButton.Name = "deployButton";
+            this.deployButton.Size = new System.Drawing.Size(75, 23);
+            this.deployButton.TabIndex = 13;
+            this.deployButton.Text = "Deploy";
+            this.deployButton.UseVisualStyleBackColor = true;
+            this.deployButton.Click += new System.EventHandler(this.button1_Click);
             // 
-            // textBox1
+            // parachuteTextBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(27, 471);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(75, 20);
-            this.textBox1.TabIndex = 14;
+            this.parachuteTextBox.Enabled = false;
+            this.parachuteTextBox.Location = new System.Drawing.Point(27, 471);
+            this.parachuteTextBox.Name = "parachuteTextBox";
+            this.parachuteTextBox.Size = new System.Drawing.Size(75, 20);
+            this.parachuteTextBox.TabIndex = 14;
             // 
             // panel1
             // 
@@ -572,35 +575,38 @@
             this.combutton.UseVisualStyleBackColor = true;
             this.combutton.Click += new System.EventHandler(this.combutton_Click);
             // 
-            // checkBox1
+            // parachuteCheckBox
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.checkBox1.ForeColor = System.Drawing.Color.Red;
-            this.checkBox1.Location = new System.Drawing.Point(27, 441);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(260, 24);
-            this.checkBox1.TabIndex = 20;
-            this.checkBox1.Text = "Enable manual parachute deploy";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.parachuteCheckBox.AutoSize = true;
+            this.parachuteCheckBox.Enabled = false;
+            this.parachuteCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.parachuteCheckBox.ForeColor = System.Drawing.Color.Red;
+            this.parachuteCheckBox.Location = new System.Drawing.Point(27, 441);
+            this.parachuteCheckBox.Name = "parachuteCheckBox";
+            this.parachuteCheckBox.Size = new System.Drawing.Size(260, 24);
+            this.parachuteCheckBox.TabIndex = 20;
+            this.parachuteCheckBox.Text = "Enable manual parachute deploy";
+            this.parachuteCheckBox.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // pressureSend
             // 
-            this.button2.Location = new System.Drawing.Point(104, 282);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 23;
-            this.button2.Text = "Connect";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.pressureSend.Enabled = false;
+            this.pressureSend.Location = new System.Drawing.Point(104, 282);
+            this.pressureSend.Name = "pressureSend";
+            this.pressureSend.Size = new System.Drawing.Size(75, 23);
+            this.pressureSend.TabIndex = 23;
+            this.pressureSend.Text = "Send";
+            this.pressureSend.UseVisualStyleBackColor = true;
+            this.pressureSend.Click += new System.EventHandler(this.button2_Click);
             // 
-            // pressuretxt
+            // pressureTextBox
             // 
-            this.pressuretxt.Location = new System.Drawing.Point(23, 283);
-            this.pressuretxt.Name = "pressuretxt";
-            this.pressuretxt.Size = new System.Drawing.Size(75, 20);
-            this.pressuretxt.TabIndex = 22;
-            this.pressuretxt.Text = "1013.25";
+            this.pressureTextBox.Enabled = false;
+            this.pressureTextBox.Location = new System.Drawing.Point(23, 283);
+            this.pressureTextBox.Name = "pressureTextBox";
+            this.pressureTextBox.Size = new System.Drawing.Size(75, 20);
+            this.pressureTextBox.TabIndex = 22;
+            this.pressureTextBox.Text = "1013.25";
             // 
             // label10
             // 
@@ -620,17 +626,17 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(760, 504);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.pressuretxt);
+            this.Controls.Add(this.pressureSend);
+            this.Controls.Add(this.pressureTextBox);
             this.Controls.Add(this.label10);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.parachuteCheckBox);
             this.Controls.Add(this.combutton);
             this.Controls.Add(this.comtxt);
             this.Controls.Add(this.label17);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.parachuteTextBox);
+            this.Controls.Add(this.deployButton);
             this.Controls.Add(this.gpslbl);
             this.Controls.Add(this.barometriclbl);
             this.Controls.Add(this.gyroscopelbl);
@@ -667,8 +673,8 @@
         private System.Windows.Forms.Label accelerometerlbl;
         private System.Windows.Forms.Label sensorStatuslbl;
         private System.Windows.Forms.Label rocketstatuslbl;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button deployButton;
+        private System.Windows.Forms.TextBox parachuteTextBox;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label14;
@@ -696,9 +702,9 @@
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.TextBox comtxt;
         private System.Windows.Forms.Button combutton;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.TextBox pressuretxt;
+        private System.Windows.Forms.CheckBox parachuteCheckBox;
+        private System.Windows.Forms.Button pressureSend;
+        private System.Windows.Forms.TextBox pressureTextBox;
         private System.Windows.Forms.Label label10;
 
     }
