@@ -17,6 +17,7 @@
 Adafruit_GPS GPS(&Serial);
 #define GPSECHO  false   //Echo to serial port
 boolean usingInterrupt = false;   //Manual interrupt to call data
+void useInterrupt(boolean);
 
 //Timer variable to be used throughout program  (MAKE SURE NOT SAME AS GPS TIMER, IF BEING USED)
 uint32_t timer = millis();
@@ -61,9 +62,15 @@ void setup()
 //-----------------------------------------------------------------------------------------------------
 //GPS INITIALIZATION
 
-Adafruit_GPS GPS(&Serial1);
-setupGPS()
-  
+setupGPS();
+
+//GPS.begin(9600);
+//GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY); //Time/location data only
+//// GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);  //Fix data and altitude 
+//GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
+//useInterrupt(true);
+//delay(1000);
+
 //----------------------------------------------------------------------------------------------------- 
 //BMP180 PRESSURE SENSOR INTIALIZATION
   
@@ -81,9 +88,11 @@ setupGPS()
 
 }
 
-
-
-
+//This is from the GPS_testing code that works with Mega2560
+SIGNAL(TIMER0_COMPA_vect)
+{
+  char c = GPS.read();
+}
 
 
 void loop()

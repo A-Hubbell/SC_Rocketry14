@@ -1,4 +1,4 @@
-// This code is adapted from the "parsing" example from Adafruit for their Ultimate GPS
+// This code is adapted from the "parsing" example from Adafruit for their Ultimate GPS Breakout module
 
 // Test code for Adafruit GPS modules using MTK3329/MTK3339 driver
 //
@@ -7,28 +7,32 @@
 // when a new NMEA sentence is available! Then access data when
 // desired.
 //
-// Tested and works great with the Adafruit Ultimate GPS module
-// using MTK33x9 chipset
-//    ------> http://www.adafruit.com/products/746
-// Pick one up today at the Adafruit electronics shop 
-// and help support open source hardware & software! -ada
+
+//--------------------------------------Updates------------------------------------------------
+//March 20, 2014: This code works perfectly with Arduino Mega2560 using hardware serial. GPS
+//                coordinates were correct, however it took about 30 minutes to acquire a fix
+//                through a third-floor window on a cloudy day
+//
+//
+//
+//---------------------------------------------------------------------------------------------
 
 #include <Adafruit_GPS.h>
 #include <SoftwareSerial.h>
 
-// If you're using a GPS module:
-// Connect the GPS Power pin to 5V
-// Connect the GPS Ground pin to ground
 // If using hardware serial (e.g. Arduino Mega):
 //   Connect the GPS TX (transmit) pin to Arduino RX1, RX2 or RX3
 //   Connect the GPS RX (receive) pin to matching TX1, TX2 or TX3
 
-Adafruit_GPS GPS(&Serial);
+
+//SoftwareSerial mySerial(51, 50);
+
+Adafruit_GPS GPS(&Serial1);
 
 
 // Set GPSECHO to 'false' to turn off echoing the GPS data to the Serial console
 // Set to 'true' if you want to debug and listen to the raw GPS sentences. 
-#define GPSECHO  true
+#define GPSECHO  false
 
 // this keeps track of whether we're using the interrupt
 // off by default!
@@ -49,7 +53,7 @@ void setup()
   // uncomment this line to turn on RMC (recommended minimum) and GGA (fix data) including altitude
   // GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
   // uncomment this line to turn on only the "minimum recommended" data
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
+   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
   // For parsing data, we don't suggest using anything but either RMC only or RMC+GGA since
   // the parser doesn't care about other sentences at this time
   
@@ -59,7 +63,7 @@ void setup()
   // print it out we don't suggest using anything higher than 1 Hz
 
   // Request updates on antenna status, comment out to keep quiet
-  GPS.sendCommand(PGCMD_ANTENNA);
+  // GPS.sendCommand(PGCMD_ANTENNA);
 
   // the nice thing about this code is you can have a timer0 interrupt go off
   // every 1 millisecond, and read data from the GPS for you. that makes the
@@ -73,18 +77,13 @@ void setup()
 
 
 // Interrupt is called once a millisecond, looks for any new GPS data, and stores it
-SIGNAL(TIMER0_COMPA_vect) {
+SIGNAL(TIMER0_COMPA_vect) 
+{
   char c = GPS.read();
-  // if you want to debug, this is a good time to do it!
-#ifdef UDR0
-  if (GPSECHO)
-    if (c) UDR0 = c;  
-    // writing direct to UDR0 is much much faster than Serial.print 
-    // but only one character can be written at a time. 
-#endif
 }
 
-void useInterrupt(boolean v) {
+void useInterrupt(boolean v) 
+{
   if (v) {
     // Timer0 is already used for millis() - we'll just interrupt somewhere
     // in the middle and call the "Compare A" function above
@@ -103,21 +102,18 @@ void loop()                     // run over and over again
 {
   // in case you are not using the interrupt above, you'll
   // need to 'hand query' the GPS, not suggested :(
-  if (! usingInterrupt) {
+  if (! usingInterrupt) 
+  {
     // read data from the GPS in the 'main loop'
     char c = GPS.read();
-    // if you want to debug, this is a good time to do it!
-    if (GPSECHO)
-      if (c) Serial.print(c);
   }
   
   // if a sentence is received, we can check the checksum, parse it...
-  if (GPS.newNMEAreceived()) {
+  if (GPS.newNMEAreceived()) 
+  {
     // a tricky thing here is if we print the NMEA sentence, or data
     // we end up not listening and catching other sentences! 
     // so be very wary if using OUTPUT_ALLDATA and trytng to print out data
-    //Serial.println(GPS.lastNMEA());   // this also sets the newNMEAreceived() flag to false
-  
     if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
       return;  // we can fail to parse a sentence in which case we should just wait for another
   }
@@ -134,22 +130,13 @@ void loop()                     // run over and over again
     Serial.print(GPS.minute, DEC); Serial.print(':');
     Serial.print(GPS.seconds, DEC); Serial.print('.');
     Serial.println(GPS.milliseconds);
-    Serial.print("Date: ");
-    Serial.print(GPS.day, DEC); Serial.print('/');
-    Serial.print(GPS.month, DEC); Serial.print("/20");
-    Serial.println(GPS.year, DEC);
-    Serial.print("Fix: "); Serial.print((int)GPS.fix);
-    Serial.print(" quality: "); Serial.println((int)GPS.fixquality); 
-    if (GPS.fix) {
+
+    if (GPS.fix) 
+    {
       Serial.print("Location: ");
       Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
       Serial.print(", "); 
       Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
-      
-      Serial.print("Speed (knots): "); Serial.println(GPS.speed);
-      Serial.print("Angle: "); Serial.println(GPS.angle);
-      Serial.print("Altitude: "); Serial.println(GPS.altitude);
-      Serial.print("Satellites: "); Serial.println((int)GPS.satellites);
     }
   }
 }
