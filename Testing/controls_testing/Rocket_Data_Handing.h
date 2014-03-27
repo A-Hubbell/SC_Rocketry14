@@ -1,10 +1,16 @@
 //This is a tab for functions dealing with storing/exporting data from the rocket
+/* DATA templates, data must be sent in this format in order for the ground application to process it properly
+STATUS can be ONLINE or OFFLINE
+BMP sensors  BMP:STATUS:PRESSURE:TEMPERATURE:ALTITUDE
+GPS sensors  GPS:STATUS: austin put fields here
+DOF sensors  DOF:STATUS: tom put your fields here
 
+*/
 include "Arduino.h"
 
 
-//void dataXbeeOut()
-//{
+void dataXbeeOut()
+{
 //  
 //  //Send all 9-DOF data, 9 channels
 //  for(int i = 0; i<9; i++)
@@ -17,11 +23,12 @@ include "Arduino.h"
 //  Serial2.println(" ");
 //  
 //  //Send all BMP180 data, 4 channels
-//  for(int i = 0; i<4; i++)
-//  {
-//  Serial2.print(bmpData[i]);
-//  Serial2.print("    ");
-//  }
+  Serial2.print("BMP:ONLINE");
+  for(int i = 0; i<4; i++)
+  {
+    Serial2.print(bmpData[i]);
+    Serial2.print(":");
+  }
 //  
 //  
 //  Serial2.println(" ");
@@ -36,7 +43,7 @@ include "Arduino.h"
 //
 //  Serial2.println(" ");
 //  
-//}
+}
 
 
 

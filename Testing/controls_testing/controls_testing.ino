@@ -35,8 +35,8 @@ const int DROGUE_EMATCH_PIN = 1; //Pin connected to drogue parachute e-match
 const int MAIN_EMATCH_PIN = 2; //Pin connected to main parachute e-match
 const int APOGEE_ACCEL_THRESH = 3; // Acceleration upper threshold for apogee detection
 const int MAIN_ALT_THRESH = 1800; //Altitude lower threshold for main chute deployment (1800 ft.)
-
-
+const char PRESSURE_CODE[10] = "pressure:"; //String for determining if sent data is request to change sea level pressure
+const char PARACHUTE_CODE[10] = "LaunchPar";  // String for determining of sent data is request to manually deploy parachute
 
 
 void setup()
@@ -101,6 +101,16 @@ void loop()
   
  delay(500) // intial delay for all electronics
  
+ if (Serial.available() > 0 ) // Check for incoming serial data
+  {
+    char dataRecieved[100] = {'\0'};
+    int arraySize = 0;
+    while (Serial.available() > 0) { // While we have serial data read it into an array of characters
+        dataRecieved[arraySize++] = Serial.read();
+        
+    }
+    inspectRecievedSerialData(dataRecieved); // Inspect the data to determine what was recieved and what to do
+  }
 
  
  //----------------------------------------------------------------------------------------------------- 
@@ -188,7 +198,38 @@ void loop()
 //----------------------------------------------------------------------------------------------------- 
 //----------------------------------------------------------------------------------------------------- 
 //CUSTOM FUNCTIONS HERE!!!
+void inspectRecievedSerialData(char str[100])
+{
+  boolean boolPressureValue = true;
+  boolean boolLaunch = true;
 
+  for (int i = 0; i < 9; i++ ) // Determine if the data sent was a request for sea level pressure change
+  {                            // or to manually deploy parachute
+     if (PRESSURE_CODE[i] != str[i] )
+       boolPressureValue = false;
+     if (PARACHUTE_CODE[i] != str[i] )
+       boolLaunch = false;
+  }
+  if( boolPressureValue) // Was it a pressure change request?
+   {
+     char intToConvert[100] = {'\0'}; // If it was then we must convert the ascii values to integers
+     int i = 9; // start at 9 because everything before is the code word
+     
+     while ( str[i] != '\0') // read all the numbers in until we encounter \0
+     {
+       intToConvert[i - 9] = str[i]; 
+       i++;
+     }
+     seaLevelPressure = atof(intToConvert); // atof converts character array into float
+     //Serial.println(seaLevelPressure);
+   }
+   else if (boolLaunch) // Was it manual parachute deploy?
+   {
+      pinMode(10,OUTPUT); // Here we will have to check if the rocket is in the correct stage to allow this
+      digitalWrite(10,HIGH);
+   }
+  
+}
 
 
 //----------------------------------------------------------------------------------------------------- 

@@ -1,4 +1,18 @@
-﻿using System;
+﻿/*
+      Title: Ground Rocket Software
+    Creator: Harley McPhee
+Description: The purpose of this software is to connect to an xbee via serial port, the xbee should recieve information
+from an arduino hooked up to an xbee and multiple sensors.
+The sensors data this program should expect are
+Pressure
+Altitude
+GPS cordinates
+Velocity
+Acceleration
+The program will also allow the xbee to transmit information to the arduino such as a signal to manually deploy the parachute
+and also to manually change the sea level air pressure value
+*/
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,14 +27,13 @@ namespace WindowsFormsApplication1
 {
     public partial class RocketGroundControl : Form
     {
-        SerialPort port;
-        string[] dataArray;
+        public SerialPort xbeePort; 
+        public string[] dataRecievedArray;
         public bool connected = false;
         delegate void SetTextCallback();
         public RocketGroundControl()
         {
-            InitializeComponent();
-            
+            InitializeComponent(); 
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -30,10 +43,10 @@ namespace WindowsFormsApplication1
         }
         private void portDataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
-            string data = port.ReadLine();
-           
-            dataArray = data.Split(':');
-            if (dataArray[0] == "BMP" && dataArray.Count() > 4)
+            string data = xbeePort.ReadLine();
+
+            dataRecievedArray = data.Split(':'); // Split up each piece of data into an array
+            if (dataRecievedArray[0] == "BMP" && dataRecievedArray.Count() > 4) // Checks if we recieved BMP sensor info format BMP:ONLINE:PRESSURE:TEMPERATURE:ALTITUDE
             {
                 setText();
             }
@@ -41,14 +54,14 @@ namespace WindowsFormsApplication1
         }
         private void setText()
         {
-            if (this.barometriclbl.InvokeRequired)
+            if (this.barometriclbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
             {
                 SetTextCallback d = new SetTextCallback(setText);
                 this.Invoke(d, new object[] { });
             }
             else
             {
-                if (dataArray[1] == "Offline")
+                if (dataRecievedArray[1] == "Offline")
                 {
                     barometriclbl.Text = "Offline";
                     barometriclbl.ForeColor = Color.Red;
@@ -56,22 +69,22 @@ namespace WindowsFormsApplication1
                 else
                 {
                     barometriclbl.Text = "Online";
-                    airpressurelbl.Text = dataArray[2];
-                    altitudelbl.Text = dataArray[4];
+                    airpressurelbl.Text = dataRecievedArray[2];
+                    altitudelbl.Text = dataRecievedArray[4];
                     barometriclbl.ForeColor = Color.Lime;
                 }
             }
         }
         private void combutton_Click(object sender, EventArgs e)
         {
-            if (!connected)
+            if (!connected) // Check if connection exists
             {
-                port = new SerialPort(comtxt.Text, 9600);
-                port.DtrEnable = false;
-                port.RtsEnable = false;
+                xbeePort = new SerialPort(comtxt.Text, 9600);
+                xbeePort.DtrEnable = false;
+                xbeePort.RtsEnable = false;
                 try
                 {
-                    port.Open();
+                    xbeePort.Open();
                     connected = true;
                     combutton.Text = "Disconnect";
                     comtxt.Enabled = false;
@@ -83,16 +96,16 @@ namespace WindowsFormsApplication1
                 }
                 catch
                 {
-                    MessageBox.Show("Invalid COM port.");
+                    MessageBox.Show("Invalid COM xbeePort.");
                 }
-                port.DataReceived += new SerialDataReceivedEventHandler(portDataReceived);
+                xbeePort.DataReceived += new SerialDataReceivedEventHandler(portDataReceived);
             }
             else
             {
                 try
                 {
-                    port.DataReceived -= new SerialDataReceivedEventHandler(portDataReceived);
-                    port.Close();
+                    xbeePort.DataReceived -= new SerialDataReceivedEventHandler(portDataReceived);
+                    xbeePort.Close();
                     combutton.Text = "Connect";
                     connected = false;
                     comtxt.Enabled = true;
@@ -110,14 +123,14 @@ namespace WindowsFormsApplication1
         }
         private void button2_Click(object sender, EventArgs e)
         {
-            port.Write("pressure:" + pressureTextBox.Text);
+            xbeePort.Write("pressure:" + pressureTextBox.Text);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             if (parachuteCheckBox.Checked && parachuteTextBox.Text == "manual")
             {
-                port.Write("LaunchPar");
+                xbeePort.Write("LaunchPar");
             }
         }
 
