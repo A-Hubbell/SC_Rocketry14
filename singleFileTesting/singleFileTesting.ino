@@ -5,12 +5,9 @@
 
 //Libraries
 
-#include "Rocket_Sensors.h"
-#include "Rocket_Data_Handing.h"  //Change the tab name to "Handling" not "Handing"
-
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
-#include <Adafruit_BMP085.h>
+#include <Adafruit_BMP085_U.h>
 #include <Adafruit_GPS.h>
 #include <SoftwareSerial.h>
 
@@ -31,14 +28,25 @@ float bmpData[4] = {0,0,0,0};  // Altitude  Temperature  Pressure
 float vertAccel = 0;
 
 const int LED_PIN = 0;
-const int LAUNCH_THRESH = 300; //300 ft altitude detected, switch from mode 1 to mode 2
-const int DROGUE_EMATCH_PIN = 1; //Pin connected to drogue parachute e-match
-const int MAIN_EMATCH_PIN = 2; //Pin connected to main parachute e-match
+const int LAUNCH_THRESH = 300; //300 ft altitude detected, switch from mode 1 to mode 2  CHECK WITH HARLEY, METRES OR FEET??
+const int DROGUE_EMATCH_PIN = 2; //Pin connected to drogue parachute e-match
+const int MAIN_EMATCH_PIN = 3; //Pin connected to main parachute e-match
 const int APOGEE_ACCEL_THRESH = 3; // Acceleration upper threshold for apogee detection
 const int MAIN_ALT_THRESH = 1800; //Altitude lower threshold for main chute deployment (1800 ft.)
 const char PRESSURE_CODE[10] = "pressure:"; //String for determining if sent data is request to change sea level pressure
 const char PARACHUTE_CODE[10] = "LaunchPar";  // String for determining of sent data is request to manually deploy parachute
 
+
+Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(10085);
+
+Adafruit_GPS GPS(&Serial1);
+
+boolean usingInterrupt = false;
+void useInterrupt(boolean); // Func prototype keeps Arduino 0023 happy
+
+uint32_t timer = millis();
+
+float seaLevelPressure = 0.0;
 
 void setup()
 {
@@ -76,7 +84,7 @@ setupGPS();
 //BMP180 PRESSURE SENSOR INTIALIZATION
   
   Serial.println("BMP180 Pressure Sensor Test");
-  Serial.println("")
+  Serial.println("");
   
   if(!bmp.begin())
   {
@@ -100,7 +108,7 @@ void loop()
 {
  
   
- delay(500) // intial delay for all electronics
+ delay(500); // intial delay for all electronics
  
  if (Serial.available() > 0 ) // Check for incoming serial data
   {
@@ -119,12 +127,12 @@ void loop()
   do
   {
     //Read 9-DOF data
-    getBMP(bmpData[]); //Read BMP180 data
-    getGPS(gpsData[]); //Read GPS data
+    getBMP(); //Read BMP180 data
+    getGPS(); //Read GPS data
     dataSDOut(); //Transmit data to SD logger, then Xbee
     dataXbeeOut();
   }
-  while(bmpData[0] < LAUNCH_THRESH) 
+  while(bmpData[0] < LAUNCH_THRESH); 
  
  
  
@@ -135,12 +143,12 @@ void loop()
   do
   {
     //Read 9-DOF data
-    getBMP(bmpData[]); //Read BMP180 data
-    getGPS(gpsData[]); //Read GPS data
+    getBMP(); //Read BMP180 data
+    getGPS(); //Read GPS data
     dataSDOut();  //Transmit data to SD logger, then Xbee
-    dataXbeeout();
+    dataXbeeOut();
   }
-  while(vertAccel > APOGEE_ACCEL_THRESH)
+  while(vertAccel > APOGEE_ACCEL_THRESH);
  
  
   // Set drogue chute pin HIGH, output message indicating signal sent and time to SD logger and Xbee
@@ -164,7 +172,7 @@ void loop()
     dataSDOut(); //Transmit data to SD logger, then Xbee
     dataXbeeOut();
   }
-  while(bmpData[0] > MAIN_ALT_THRESH)
+  while(bmpData[0] > MAIN_ALT_THRESH);
   
   
   //Set main chute pin HIGH, output message indicating signal sent and time to SD logger and Xbee  
@@ -278,40 +286,40 @@ void inspectRecievedSerialData(char str[100])
 
 
 
-//void dataSDOut()
-//{
-//  
-//  //Send all 9-DOF data, 9 channels
-//  for(int i = 0; i<9; i++)
-//  {
-//  Serial1.print(dofData[i]
-//  Serial1.print("    ");
-//  }
-//  
-//  //Each sensor (9dof/bmp180/gps) outputs all of its data on one line and then we go to the next line for the next sensor 
-//  Serial1.println(" ");
-//  
-//  //Send all BMP180 data, 4 channels
-//  for(int i = 0; i<4; i++)
-//  {
-//  Serial1.print(bmpData[i]);
-//  Serial1.print("    ");
-//  }
-//  
-//  
-//  Serial1.println(" ");
-//  
-//  //Send all GPS data, 10 channels
-//  for(int i =0; i<10; i++)
-//  {
-//  Serial1.print(gpsData[i]);
-//  Serial1.print("    ");
-//  }
-//  
-//
-//  Serial1.println(" ");
-//  
-//}
+void dataSDOut()
+{
+  
+  //Send all 9-DOF data, 9 channels
+  for(int i = 0; i<9; i++)
+  {
+  Serial1.print(dofData[i]);
+  Serial1.print("    ");
+  }
+  
+  //Each sensor (9dof/bmp180/gps) outputs all of its data on one line and then we go to the next line for the next sensor 
+  Serial1.println(" ");
+  
+  //Send all BMP180 data, 4 channels
+  for(int i = 0; i<4; i++)
+  {
+  Serial1.print(bmpData[i]);
+  Serial1.print("    ");
+  }
+  
+  
+  Serial1.println(" ");
+  
+  //Send all GPS data, 10 channels
+  for(int i =0; i<10; i++)
+  {
+  Serial1.print(gpsData[i]);
+  Serial1.print("    ");
+  }
+  
+
+  Serial1.println(" ");
+  
+}
 
 
 
@@ -352,6 +360,166 @@ void dataXbeeOut()
 //  
 }
 
+
+void getGPS()
+{
+  if (! usingInterrupt) 
+  {
+    // read data from the GPS in the 'main loop'
+    char c = GPS.read();
+  }
+
+  
+  // if a sentence is received, we can check the checksum, parse it...
+  if (GPS.newNMEAreceived()) 
+  {
+    // a tricky thing here is if we print the NMEA sentence, or data
+    // we end up not listening and catching other sentences! 
+    // so be very wary if using OUTPUT_ALLDATA and trytng to print out data
+    //Serial.println(GPS.lastNMEA());   // this also sets the newNMEAreceived() flag to false
+  
+    if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
+      return;  // we can fail to parse a sentence in which case we should just wait for another
+  }
+
+  // if millis() or timer wraps around, we'll just reset it
+  if (timer > millis())  timer = millis();
+
+  
+  // approximately every 2 seconds or so, print out the current stats
+  
+  if (millis() - timer > 2000) 
+  { 
+
+  timer = millis(); // reset the timer
+    
+    Serial.print("\nTime: ");
+    Serial.print(GPS.hour, DEC); Serial.print(':');
+    Serial.print(GPS.minute, DEC); Serial.print(':');
+    Serial.print(GPS.seconds, DEC); Serial.print('.');
+    Serial.println(GPS.milliseconds);
+    if (GPS.fix) 
+    {
+
+      gpsData[0] = GPS.hour;
+      gpsData[1] = GPS.minute;
+      gpsData[2] = GPS.seconds;
+      gpsData[3] = GPS.milliseconds;
+      gpsData[4] = GPS.fix;  //Boolean 1 if there is a satellite fix, 0 if there isn't
+      gpsData[5] = GPS.latitude;
+      gpsData[6] = GPS.longitude;
+      gpsData[7] = GPS.speed;  //Measured in knots
+      gpsData[8] = GPS.altitude;  //Measured in centimeters
+      gpsData[9] = timer;
+      
+      
+      
+    }
+    
+    else
+    {
+      Serial.println("NO FIX"); 
+    }
+    
+  }
+
+}
+
+void setupGPS()
+{
+  GPS.begin(9600);
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY); //Time/location data only
+  // GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);  //Fix data and altitude 
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
+  useInterrupt(true);
+  delay(1000);
+}
+
+
+
+void useInterrupt(boolean v) 
+{
+  if (v) {
+    // Timer0 is already used for millis() - we'll just interrupt somewhere
+    // in the middle and call the "Compare A" function above
+    OCR0A = 0xAF;
+    TIMSK0 |= _BV(OCIE0A);
+    usingInterrupt = true;
+  } else {
+    // do not call the interrupt function COMPA anymore
+    TIMSK0 &= ~_BV(OCIE0A);
+    usingInterrupt = false;
+  }
+}
+
+
+
+
+
+
+
+
+void getBMP()
+{
+ // Get a new sensor event 
+  sensors_event_t event;
+  bmp.getEvent(&event);
+ 
+  /* Display the results (barometric pressure is measure in hPa) */
+  if (event.pressure)
+  {
+    /* Display atmospheric pressure in hPa */
+  //  Serial.print(event.pressure);
+     
+    /* First we get the current temperature from the BMP085 */
+    float temperature;
+    bmp.getTemperature(&temperature);
+  //  Serial.print(temperature);
+    
+
+    /* Then convert the atmospheric pressure, SLP and temp to altitude    */
+    /* Update this next line with the current SLP for better results      */
+    seaLevelPressure = SENSORS_PRESSURE_SEALEVELHPA;
+ //   Serial.print("Altitude:    "); 
+   // Serial.print(bmp.pressureToAltitude(seaLevelPressure,event.pressure,temperature)); 
+    bmpData[0] = bmp.pressureToAltitude(seaLevelPressure,event.pressure,temperature);
+    bmpData[1] = temperature;
+    bmpData[2] = event.pressure;
+    bmpData[3] = timer;
+}
+  
+  else
+  {
+    Serial1.print("BMP180 Pressure Sensor error    ");
+    Serial1.println(timer);
+    Serial2.print("BMP180 Pressure Sensor error    ");
+    Serial2.println(timer);
+  }
+ 
+}
+
+
+
+
+void getDOF(float dofLocalData[])
+{
+  
+ //Code here 
+  
+}
+
+
+
+
+//-----------------------------------------------------------------------------------------------------
+//9 DOF Setup Function
+
+void setupDOF()
+{
+  
+ //Code here 
+  
+}
 
 
 

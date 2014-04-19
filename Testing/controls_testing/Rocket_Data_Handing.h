@@ -8,42 +8,44 @@ DOF sensors  DOF:STATUS: tom put your fields here
 */
 include "Arduino.h"
 
+//Change the tab name to "Handling" not "Handing"
 
-void dataXbeeOut()
-{
-//  
-//  //Send all 9-DOF data, 9 channels
-//  for(int i = 0; i<9; i++)
+
+//void dataXbeeOut()
+//{
+////  
+////  //Send all 9-DOF data, 9 channels
+////  for(int i = 0; i<9; i++)
+////  {
+////  Serial2.print(dofData[i]
+////  Serial2.print("    ");
+////  }
+////  
+////  //Each sensor (9dof/bmp180/gps) outputs all of its data on one line and then we go to the next line for the next sensor 
+////  Serial2.println(" ");
+////  
+////  //Send all BMP180 data, 4 channels
+//  Serial2.print("BMP:ONLINE");
+//  for(int i = 0; i<4; i++)
 //  {
-//  Serial2.print(dofData[i]
-//  Serial2.print("    ");
+//    Serial2.print(bmpData[i]);
+//    Serial2.print(":");
 //  }
-//  
-//  //Each sensor (9dof/bmp180/gps) outputs all of its data on one line and then we go to the next line for the next sensor 
-//  Serial2.println(" ");
-//  
-//  //Send all BMP180 data, 4 channels
-  Serial2.print("BMP:ONLINE");
-  for(int i = 0; i<4; i++)
-  {
-    Serial2.print(bmpData[i]);
-    Serial2.print(":");
-  }
-//  
-//  
-//  Serial2.println(" ");
-//  
-//  //Send all GPS data, 10 channels
-//  for(int i =0; i<10; i++)
-//  {
-//  Serial2.print(gpsData[i]);
-//  Serial2.print("    ");
-//  }
-//  
-//
-//  Serial2.println(" ");
-//  
-}
+////  
+////  
+////  Serial2.println(" ");
+////  
+////  //Send all GPS data, 10 channels
+////  for(int i =0; i<10; i++)
+////  {
+////  Serial2.print(gpsData[i]);
+////  Serial2.print("    ");
+////  }
+////  
+////
+////  Serial2.println(" ");
+////  
+//}
 
 
 

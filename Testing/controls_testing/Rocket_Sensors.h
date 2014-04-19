@@ -1,9 +1,22 @@
 //This is a tab for all of the code to fetch data from the rocket sensors (9dof/bmp180/GPS)
 
 #include "Arduino.h"
+#include <Adafruit_GPS.h>
+#include <SoftwareSerial.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP085_U.h>
+#include <Wire.h>
 
 
+boolean usingInterrupt = false;   //Manual interrupt to call data
+void useInterrupt(boolean);
 
+Adafruit_GPS GPS(&Serial);
+#define GPSECHO  false   //Echo to serial port
+
+uint32_t timer = millis();
+
+Adafruit_BMP085_U bmp = Adafruit_BMP085_U(10085);
 
 //-----------------------------------------------------------------------------------------------------
 //---------------------------------------Adafruit Ultimate GPS-----------------------------------------
@@ -84,7 +97,7 @@ void setupGPS()
   // GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);  //Fix data and altitude 
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
   useInterrupt(true);
-  delay(1000)
+  delay(1000);
 }
 
 
@@ -103,7 +116,7 @@ void useInterrupt(boolean v)
   }
 }
 
-uint32_t timer = millis();
+//uint32_t timer = millis();
 
 
 
