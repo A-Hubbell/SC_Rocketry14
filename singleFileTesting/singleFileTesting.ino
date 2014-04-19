@@ -10,6 +10,14 @@
 #include <Adafruit_BMP085_U.h>
 #include <Adafruit_GPS.h>
 #include <SoftwareSerial.h>
+#include <Adafruit_ADXL345_U.h>
+#include <Adafruit_HMC5883_U.h>
+
+/* Assign a unique ID to this sensor at the same time */
+Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(00001);
+
+/* Assign a unique ID to this sensor at the same time */
+Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(00002);
 
 //Adafruit GPS objects and settings (MOVE TO SENSOR HEADER FILE??)
 //Adafruit_GPS GPS(&Serial);
@@ -22,7 +30,7 @@
 
 //Global variables and constants
 
-float dofData[9] = {0,0,0,0,0,0,0,0,0}; //9 channels
+float dofData[9] = {0,0,0,0,0,0,0}; //9 channels (accel xyz, mag xyz, heading, 2 unused)
 float gpsData[10] = {0,0,0,0,0,0,0,0,0,0}; // CHANGE to suit number of required data fields 
 float bmpData[4] = {0,0,0,0};  // Altitude  Temperature  Pressure
 float vertAccel = 0;
@@ -89,7 +97,7 @@ setupGPS();
   if(!bmp.begin())
   {
     /* There was a problem detecting the BMP085 ... check your connections */
-    Serial.print("Ooops, no BMP085 detected ... Check your wiring or I2C ADDR!");
+    Serial.print("Oops, no BMP085 detected ... Check your wiring or I2C ADDR!");
     while(1);
   }
 
@@ -126,7 +134,7 @@ void loop()
  //Rocket pre-launch algorithm
   do
   {
-    //Read 9-DOF data
+    getDOF(); //Read 9-DOF data
     getBMP(); //Read BMP180 data
     getGPS(); //Read GPS data
     dataSDOut(); //Transmit data to SD logger, then Xbee
@@ -142,7 +150,7 @@ void loop()
   //Send current HIGH to DROGUE parachute e-match when vertAccel less than or equal to APOGEE_ACCEL_THRESH
   do
   {
-    //Read 9-DOF data
+    getDOF(); //Read 9-DOF data
     getBMP(); //Read BMP180 data
     getGPS(); //Read GPS data
     dataSDOut();  //Transmit data to SD logger, then Xbee
@@ -166,7 +174,7 @@ void loop()
   //Send current HIGH to MAIN parachute e-match when bmpData[0] (rocket altitude) equal to or below MAIN_ALT_THRESH
   do
   {
-    //Read 9-DOF data
+    getDOF(); //Read 9-DOF data
     getBMP(); //Read BMP180 data
     getGPS(); //Read GPS data
     dataSDOut(); //Transmit data to SD logger, then Xbee
@@ -189,7 +197,7 @@ void loop()
  
   while(true)
   {
-    //Read 9-DOF data
+    getDOF(); //Read 9-DOF data
     getBMP(); //Read BMP180 data
     getGPS(); //Read GPS data
     dataSDOut(); //Transmit data to SD logger, then Xbee
@@ -290,7 +298,7 @@ void dataSDOut()
 {
   
   //Send all 9-DOF data, 9 channels
-  for(int i = 0; i<9; i++)
+  for(int i = 0; i<7; i++)
   {
   Serial1.print(dofData[i]);
   Serial1.print("    ");
@@ -328,12 +336,12 @@ void dataXbeeOut()
 {
 //  
 //  //Send all 9-DOF data, 9 channels
-//  for(int i = 0; i<9; i++)
-//  {
-//  Serial2.print(dofData[i]
-//  Serial2.print("    ");
-//  }
-//  
+  for(int i = 0; i<7; i++)
+  {
+  Serial2.print(dofData[i]);
+  Serial2.print("    ");
+  }
+  
 //  //Each sensor (9dof/bmp180/gps) outputs all of its data on one line and then we go to the next line for the next sensor 
 //  Serial2.println(" ");
 //  
@@ -501,11 +509,44 @@ void getBMP()
 
 
 
-void getDOF(float dofLocalData[])
+void getDOF()
 {
+  /* Get a new sensor event */ 
+  sensors_event_t event;
   
- //Code here 
+  accel.getEvent(&event); //m/s^2
+  dofData[0] = event.acceleration.x;
+  dofData[1] = event.acceleration.y;
+  dofData[2] = event.acceleration.z;
   
+  mag.getEvent(&event); //uT
+  dofData[0] = event.magnetic.x;
+  dofData[0] = event.magnetic.x;
+  dofData[0] = event.magnetic.x; 
+
+  // Hold the module so that Z is pointing 'up' and you can measure the heading with x&y
+  // Calculate heading when the magnetometer is level, then correct for signs of axis.
+  float heading = atan2(event.magnetic.y, event.magnetic.x);
+  
+  // Once you have your heading, you must then add your 'Declination Angle', which is the 'Error' of the magnetic field in your location.
+  // Find yours here: http://www.magnetic-declination.com/
+  // Mine is: -13* 2' W, which is ~13 Degrees, or (which we need) 0.22 radians
+  // If you cannot find your Declination, comment out these two lines, your compass will be slightly off.
+  
+  // Green River, UT: 10* 50' E, +/-? 0.1745 radians
+  // Montreal, QC: -14* 43' W, 0.2444 radians
+  float declinationAngle = 0.1745;
+  heading += declinationAngle;  
+  // Correct for when signs are reversed.
+  if(heading < 0)
+    heading += 2*PI;    
+  // Check for wrap due to addition of declination.
+  if(heading > 2*PI)
+    heading -= 2*PI;   
+  // Convert radians to degrees for readability.
+  float headingDegrees = heading * 180/M_PI;
+  
+  dofData[7] = headingDegrees;
 }
 
 
@@ -516,11 +557,28 @@ void getDOF(float dofLocalData[])
 
 void setupDOF()
 {
-  
+ Serial2.begin(9600);
+ 
+ /* Initialise the sensor */
+  if(!accel.begin())
+  {
+    /* There was a problem detecting the ADXL345 ... check your connections */
+    Serial2.println("Oops, no ADXL345 detected ... Check your wiring!");
+    while(1);
+  }
+
+  /* Set the range to whatever is appropriate for your project */
+  accel.setRange(ADXL345_RANGE_16_G);
+ 
+ if(!mag.begin())
+  {
+    /* There was a problem detecting the HMC5883 ... check your connections */
+    Serial.println("Oops, no HMC5883 detected ... Check your wiring!");
+    while(1);
+  }
+ 
  //Code here 
   
 }
-
-
 
 
