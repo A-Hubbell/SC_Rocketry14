@@ -43,6 +43,11 @@ namespace WindowsFormsApplication1
         }
         private void portDataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
+            /*
+             * data templates
+             BMP sensor  BMP:STATUS:PRESSURE:TEMPERATURE:ALTITUDE
+
+             */
             string data = xbeePort.ReadLine();
 
             dataRecievedArray = data.Split(':'); // Split up each piece of data into an array
