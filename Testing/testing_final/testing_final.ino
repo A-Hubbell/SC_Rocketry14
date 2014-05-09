@@ -121,7 +121,7 @@ void loop()
 {
  
   
- delay(500); // intial delay for all electronics
+ delay(5000); // intial delay for all electronics
  Serial.print("test");
  if (Serial.available() > 0 ) // Check for incoming serial data
   {
@@ -221,6 +221,8 @@ void loop()
 //----------------------------------------------------------------------------------------------------- 
 //----------------------------------------------------------------------------------------------------- 
 //CUSTOM FUNCTIONS HERE!!!
+
+
 void inspectRecievedSerialData(char str[100])
 {
   boolean boolPressureValue = true;
@@ -257,46 +259,6 @@ void inspectRecievedSerialData(char str[100])
 
 //----------------------------------------------------------------------------------------------------- 
 //Data handling functions using
-
-
-//void dataXbeeOut()
-//{
-//  
-//  //Send all 9-DOF data, 9 channels
-//  for(int i = 0; i<9; i++)
-//  {
-//  Serial2.print(dofData[i]
-//  Serial2.print("    ");
-//  }
-//  
-//  //Each sensor (9dof/bmp180/gps) outputs all of its data on one line and then we go to the next line for the next sensor 
-//  Serial2.println(" ");
-//  
-//  //Send all BMP180 data, 4 channels
-//  for(int i = 0; i<4; i++)
-//  {
-//  Serial2.print(bmpData[i]);
-//  Serial2.print("    ");
-//  }
-//  
-//  
-//  Serial2.println(" ");
-//  
-//  //Send all GPS data, 10 channels
-//  for(int i =0; i<10; i++)
-//  {
-//  Serial2.print(gpsData[i]);
-//  Serial2.print("    ");
-//  }
-//  
-//
-//  Serial2.println(" ");
-//  
-//}
-
-
-
-
 
 
 
@@ -346,43 +308,56 @@ void dataSDOut()
 
 
 
-void dataXbeeOut()
+void dataXbeeOut() //Harley: Data formatting, should there be a new line for each reading from a new sensor?
 {
 //  
 //  //Send all 9-DOF data, 9 channels
-  for(int i = 0; i<7; i++)
+  for(int i = 0; i<7; i++)  //Tom: why is this only 7 channels?
   {
+  Serial2.print("DOF:ONLINE:");
   Serial2.print(dofData[i]);
-  Serial2.print("    ");
-  
+  Serial2.println(":");
+ 
+ // Debugging only 
  // Serial.print(dofData[i]);
  // Serial.print("    ");
   
   }
   
 //  //Each sensor (9dof/bmp180/gps) outputs all of its data on one line and then we go to the next line for the next sensor 
-//  Serial2.println(" ");
-//  
+  Serial2.println(" ");
+// Serial.println(" ");
+
 //  //Send all BMP180 data, 4 channels
-  Serial2.print("BMP:ONLINE");
+  Serial2.print("BMP:ONLINE:");
   for(int i = 0; i<4; i++)
   {
     Serial2.print(bmpData[i]);
     Serial2.print(":");
-   
- //   Serial.print(bmpData[i]);
- //   Serial.print(":");
-    
+
+ // Debugging only  
+ // Serial.print(bmpData[i]);
+ // Serial.print(":");
    
   }
 
+  Serial2.println(" ");
+// Serial.println(" ");  
 
   for(int i =0; i<10; i++)
   {
-  Serial2.println("GPS DATA");
-  Serial2.print(gpsData[i]);
-  Serial2.print("    ");
+    Serial2.println("GPS:ONLINE:");
+    Serial2.print(gpsData[i]);
+    Serial2.print(":");
+  
+ // Debugging only
+ // Serial.print(gpsData[i]);
+ // Serial.print(":");
+ 
   }
+ 
+   Serial2.println(" ");
+ //  Serial.println(" ");
 
 
 }
@@ -406,28 +381,29 @@ void getGPS()
     //Serial.println(GPS.lastNMEA());   // this also sets the newNMEAreceived() flag to false
   
     if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
-      return;  // we can fail to parse a sentence in which case we should just wait for another
+       return;  // we can fail to parse a sentence in which case we should just wait for another
   }
 
   // if millis() or timer wraps around, we'll just reset it
   if (timer > millis())  timer = millis();
 
   
-  // approximately every 2 seconds or so, print out the current stats
-  
   if (millis() - timer > 2000) 
   { 
 
-  timer = millis(); // reset the timer
+    timer = millis(); // reset the timer
     
+    //Debugging only
+    /*
     Serial.print("\nTime: ");
     Serial.print(GPS.hour, DEC); Serial.print(':');
     Serial.print(GPS.minute, DEC); Serial.print(':');
     Serial.print(GPS.seconds, DEC); Serial.print('.');
     Serial.println(GPS.milliseconds);
+    */
+    
     if (GPS.fix) 
     {
-
       gpsData[0] = GPS.hour;
       gpsData[1] = GPS.minute;
       gpsData[2] = GPS.seconds;
@@ -438,9 +414,6 @@ void getGPS()
       gpsData[7] = GPS.speed;  //Measured in knots
       gpsData[8] = GPS.altitude;  //Measured in centimeters
       gpsData[9] = timer;
-      
-      
-      
     }
     
     else
@@ -466,13 +439,16 @@ void setupGPS()
 
 void useInterrupt(boolean v) 
 {
-  if (v) {
+  if (v) 
+  {
     // Timer0 is already used for millis() - we'll just interrupt somewhere
     // in the middle and call the "Compare A" function above
     OCR0A = 0xAF;
     TIMSK0 |= _BV(OCIE0A);
     usingInterrupt = true;
-  } else {
+  } 
+  else 
+  {
     // do not call the interrupt function COMPA anymore
     TIMSK0 &= ~_BV(OCIE0A);
     usingInterrupt = false;
@@ -507,13 +483,13 @@ void getBMP()
     /* Then convert the atmospheric pressure, SLP and temp to altitude    */
     /* Update this next line with the current SLP for better results      */
     seaLevelPressure = SENSORS_PRESSURE_SEALEVELHPA;
- //   Serial.print("Altitude:    "); 
+   //   Serial.print("Altitude:    "); 
    // Serial.print(bmp.pressureToAltitude(seaLevelPressure,event.pressure,temperature)); 
     bmpData[0] = bmp.pressureToAltitude(seaLevelPressure,event.pressure,temperature);
     bmpData[1] = temperature;
     bmpData[2] = event.pressure;
     bmpData[3] = timer;
-}
+  }
   
   else
   {
