@@ -53,15 +53,15 @@ namespace WindowsFormsApplication1
             dataRecievedArray = data.Split(':'); // Split up each piece of data into an array
             if (dataRecievedArray[0] == "BMP" && dataRecievedArray.Count() > 4) // Checks if we recieved BMP sensor info format BMP:ONLINE:PRESSURE:TEMPERATURE:ALTITUDE
             {
-                setText();
+                setTextBMP();
             }
            
         }
-        private void setText()
+        private void setTextBMP()
         {
             if (this.barometriclbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
             {
-                SetTextCallback d = new SetTextCallback(setText);
+                SetTextCallback d = new SetTextCallback(setTextBMP);
                 this.Invoke(d, new object[] { });
             }
             else
