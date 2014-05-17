@@ -53,9 +53,8 @@
             this.pitchlbl = new System.Windows.Forms.Label();
             this.yawlbl = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
-            this.gpsZlbl = new System.Windows.Forms.Label();
-            this.gpsYlbl = new System.Windows.Forms.Label();
-            this.gpsXlbl = new System.Windows.Forms.Label();
+            this.gpsLonglbl = new System.Windows.Forms.Label();
+            this.gpsLatlbl = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.velocityZlbl = new System.Windows.Forms.Label();
             this.velocityYlbl = new System.Windows.Forms.Label();
@@ -252,9 +251,8 @@
             this.panel1.Controls.Add(this.pitchlbl);
             this.panel1.Controls.Add(this.yawlbl);
             this.panel1.Controls.Add(this.label13);
-            this.panel1.Controls.Add(this.gpsZlbl);
-            this.panel1.Controls.Add(this.gpsYlbl);
-            this.panel1.Controls.Add(this.gpsXlbl);
+            this.panel1.Controls.Add(this.gpsLonglbl);
+            this.panel1.Controls.Add(this.gpsLatlbl);
             this.panel1.Controls.Add(this.label16);
             this.panel1.Controls.Add(this.velocityZlbl);
             this.panel1.Controls.Add(this.velocityYlbl);
@@ -389,41 +387,29 @@
             this.label13.TabIndex = 20;
             this.label13.Text = "Orientation:";
             // 
-            // gpsZlbl
+            // gpsLonglbl
             // 
-            this.gpsZlbl.AutoSize = true;
-            this.gpsZlbl.BackColor = System.Drawing.Color.Transparent;
-            this.gpsZlbl.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gpsZlbl.ForeColor = System.Drawing.Color.Lime;
-            this.gpsZlbl.Location = new System.Drawing.Point(243, 176);
-            this.gpsZlbl.Name = "gpsZlbl";
-            this.gpsZlbl.Size = new System.Drawing.Size(54, 21);
-            this.gpsZlbl.TabIndex = 19;
-            this.gpsZlbl.Text = "Z: 0";
+            this.gpsLonglbl.AutoSize = true;
+            this.gpsLonglbl.BackColor = System.Drawing.Color.Transparent;
+            this.gpsLonglbl.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gpsLonglbl.ForeColor = System.Drawing.Color.Lime;
+            this.gpsLonglbl.Location = new System.Drawing.Point(198, 176);
+            this.gpsLonglbl.Name = "gpsLonglbl";
+            this.gpsLonglbl.Size = new System.Drawing.Size(153, 21);
+            this.gpsLonglbl.TabIndex = 18;
+            this.gpsLonglbl.Text = "Longtitude: 0";
             // 
-            // gpsYlbl
+            // gpsLatlbl
             // 
-            this.gpsYlbl.AutoSize = true;
-            this.gpsYlbl.BackColor = System.Drawing.Color.Transparent;
-            this.gpsYlbl.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gpsYlbl.ForeColor = System.Drawing.Color.Lime;
-            this.gpsYlbl.Location = new System.Drawing.Point(135, 176);
-            this.gpsYlbl.Name = "gpsYlbl";
-            this.gpsYlbl.Size = new System.Drawing.Size(54, 21);
-            this.gpsYlbl.TabIndex = 18;
-            this.gpsYlbl.Text = "Y: 0";
-            // 
-            // gpsXlbl
-            // 
-            this.gpsXlbl.AutoSize = true;
-            this.gpsXlbl.BackColor = System.Drawing.Color.Transparent;
-            this.gpsXlbl.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gpsXlbl.ForeColor = System.Drawing.Color.Lime;
-            this.gpsXlbl.Location = new System.Drawing.Point(30, 176);
-            this.gpsXlbl.Name = "gpsXlbl";
-            this.gpsXlbl.Size = new System.Drawing.Size(54, 21);
-            this.gpsXlbl.TabIndex = 17;
-            this.gpsXlbl.Text = "X: 0";
+            this.gpsLatlbl.AutoSize = true;
+            this.gpsLatlbl.BackColor = System.Drawing.Color.Transparent;
+            this.gpsLatlbl.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gpsLatlbl.ForeColor = System.Drawing.Color.Lime;
+            this.gpsLatlbl.Location = new System.Drawing.Point(30, 176);
+            this.gpsLatlbl.Name = "gpsLatlbl";
+            this.gpsLatlbl.Size = new System.Drawing.Size(131, 21);
+            this.gpsLatlbl.TabIndex = 17;
+            this.gpsLatlbl.Text = "Latitude: 0";
             // 
             // label16
             // 
@@ -686,9 +672,8 @@
         private System.Windows.Forms.Label pitchlbl;
         private System.Windows.Forms.Label yawlbl;
         private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.Label gpsZlbl;
-        private System.Windows.Forms.Label gpsYlbl;
-        private System.Windows.Forms.Label gpsXlbl;
+        private System.Windows.Forms.Label gpsLonglbl;
+        private System.Windows.Forms.Label gpsLatlbl;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label velocityZlbl;
         private System.Windows.Forms.Label velocityYlbl;

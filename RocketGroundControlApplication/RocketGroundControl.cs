@@ -55,7 +55,41 @@ namespace WindowsFormsApplication1
             {
                 setTextBMP();
             }
+            else if (dataRecievedArray[0] == "GPS" && dataRecievedArray.Count() > 10)
+            {
+                setTextGPS();
+
+            }
+            else if (dataRecievedArray[0] == "DOF" && dataRecievedArray.Count() > 9)
+            {
+
+            }
            
+        }
+        private void setTextGPS()
+        {
+
+            if (this.barometriclbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
+            {
+                SetTextCallback d = new SetTextCallback(setTextGPS);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                if (dataRecievedArray[1] == "Offline")
+                {
+                    barometriclbl.Text = "Offline";
+                    barometriclbl.ForeColor = Color.Red;
+                }
+                else
+                {
+                    barometriclbl.Text = "Online";
+                    gpsLatlbl.Text = dataRecievedArray[5];
+                    gpsLonglbl.Text = dataRecievedArray[6];
+                    barometriclbl.ForeColor = Color.Lime;
+                }
+            }
+
         }
         private void setTextBMP()
         {
