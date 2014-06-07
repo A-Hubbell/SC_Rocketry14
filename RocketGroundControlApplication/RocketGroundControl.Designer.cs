@@ -66,12 +66,12 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
-            this.comtxt = new System.Windows.Forms.TextBox();
             this.combutton = new System.Windows.Forms.Button();
             this.parachuteCheckBox = new System.Windows.Forms.CheckBox();
             this.pressureSend = new System.Windows.Forms.Button();
             this.pressureTextBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
+            this.comPortCB = new System.Windows.Forms.ComboBox();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -543,17 +543,9 @@
             this.label17.TabIndex = 17;
             this.label17.Text = "Enter com port";
             // 
-            // comtxt
-            // 
-            this.comtxt.Location = new System.Drawing.Point(27, 234);
-            this.comtxt.Name = "comtxt";
-            this.comtxt.Size = new System.Drawing.Size(75, 20);
-            this.comtxt.TabIndex = 18;
-            this.comtxt.Text = "COM6";
-            // 
             // combutton
             // 
-            this.combutton.Location = new System.Drawing.Point(108, 233);
+            this.combutton.Location = new System.Drawing.Point(103, 232);
             this.combutton.Name = "combutton";
             this.combutton.Size = new System.Drawing.Size(75, 23);
             this.combutton.TabIndex = 19;
@@ -577,7 +569,7 @@
             // pressureSend
             // 
             this.pressureSend.Enabled = false;
-            this.pressureSend.Location = new System.Drawing.Point(104, 282);
+            this.pressureSend.Location = new System.Drawing.Point(103, 281);
             this.pressureSend.Name = "pressureSend";
             this.pressureSend.Size = new System.Drawing.Size(75, 23);
             this.pressureSend.TabIndex = 23;
@@ -588,9 +580,9 @@
             // pressureTextBox
             // 
             this.pressureTextBox.Enabled = false;
-            this.pressureTextBox.Location = new System.Drawing.Point(23, 283);
+            this.pressureTextBox.Location = new System.Drawing.Point(22, 282);
             this.pressureTextBox.Name = "pressureTextBox";
-            this.pressureTextBox.Size = new System.Drawing.Size(75, 20);
+            this.pressureTextBox.Size = new System.Drawing.Size(80, 20);
             this.pressureTextBox.TabIndex = 22;
             this.pressureTextBox.Text = "1013.25";
             // 
@@ -600,11 +592,19 @@
             this.label10.BackColor = System.Drawing.Color.Transparent;
             this.label10.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label10.ForeColor = System.Drawing.Color.Lime;
-            this.label10.Location = new System.Drawing.Point(19, 259);
+            this.label10.Location = new System.Drawing.Point(18, 258);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(329, 21);
             this.label10.TabIndex = 21;
             this.label10.Text = "Enter Sea Level Pressure(hPA)";
+            // 
+            // comPortCB
+            // 
+            this.comPortCB.FormattingEnabled = true;
+            this.comPortCB.Location = new System.Drawing.Point(22, 234);
+            this.comPortCB.Name = "comPortCB";
+            this.comPortCB.Size = new System.Drawing.Size(80, 21);
+            this.comPortCB.TabIndex = 24;
             // 
             // RocketGroundControl
             // 
@@ -612,12 +612,12 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(760, 504);
+            this.Controls.Add(this.comPortCB);
             this.Controls.Add(this.pressureSend);
             this.Controls.Add(this.pressureTextBox);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.parachuteCheckBox);
             this.Controls.Add(this.combutton);
-            this.Controls.Add(this.comtxt);
             this.Controls.Add(this.label17);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.panel1);
@@ -685,12 +685,12 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.TextBox comtxt;
         private System.Windows.Forms.Button combutton;
         private System.Windows.Forms.CheckBox parachuteCheckBox;
         private System.Windows.Forms.Button pressureSend;
         private System.Windows.Forms.TextBox pressureTextBox;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.ComboBox comPortCB;
 
     }
 }
