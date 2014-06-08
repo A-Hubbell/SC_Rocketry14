@@ -40,13 +40,7 @@ if (parachuteDeploy(2))
   digitalWrite(MAIN_EMATCH_PIN, HIGH);
 }
 
-
-
-
-
 */
-
-
 
 //Libraries
 
@@ -142,10 +136,60 @@ void setup()
 
 }
 
+void split(char inputArray[], char delimiter, float outputArray[])
+{
+	string tempVal = "";
+	string tempArray[10];
+	int count = 0;
+
+	for(int i = 0; i <= strlen(inputArray); i++)
+	{
+		if (inputArray[i] != delimiter) // not delimiter, so append to string
+		{
+			tempVal += inputArray[i];
+      if(i == strlen(inputArray)) // last element, so no delimiter, need this special case
+        tempArray[count] = tempVal;
+		}
+		else
+		{
+			tempArray[count++] = tempVal;	
+			tempVal = ""; //clear val for next
+		}
+	}
+
+	float floatVal;
+	int periodPosition;
+	float divisionFactor;
+
+	for(int i = 0; !tempArray[i].empty(); i++)
+	{
+    floatVal = 0;
+    divisionFactor = 10; //for each value, we divide by an increasing order of 10 so that we can fix it once we have the proper decimal point position
+		periodPosition = tempArray[i].length() - 1; //this allows us to multiply the final float val to the proper value (e.g. 1.2345 becomes 123.45)
+
+		for(int j = 0; j < (tempArray[i].length()); j++)
+		{
+			if(tempArray[i].at(j) == '.')
+			{
+				periodPosition = j - 1;
+			}
+			if(tempArray[i].at(j) >= 48 && tempArray[i].at(j) <= 57)
+			{
+				divisionFactor /= 10;
+
+				floatVal += (float)(tempArray[i].at(j) - 48) * divisionFactor;
+			}	
+		}
+
+		for(int k = 0; k < periodPosition; k++)
+			floatVal *= 10;
+
+			outputArray[i] = floatVal;
+	}
+}
 
 void loop()
 {
- 
   
  delay(500); // intial delay for all electronics
  
@@ -157,7 +201,10 @@ void loop()
         dataRecieved[arraySize++] = Serial.read();
         
     }
-    inspectRecievedSerialData(dataRecieved); // Inspect the data to determine what was recieved and what to do
+    if(inspectRecievedSerialData(dataRecieved)) // Inspect the data to determine what was recieved and what to do
+	{
+		split(dataReceived, ':', gpsData);
+	}
   }
 
  
@@ -296,12 +343,8 @@ boolean parachuteDeploy(int parachuteCode)
   
 }
 
-
-
-
-
 //-----------------------------------------------------------------------------------------------------
-void inspectRecievedSerialData(char str[100])
+bool inspectRecievedSerialData(char str[100])
 {
   boolean boolPressureValue = true;
   boolean boolLaunch = true;
@@ -331,7 +374,8 @@ void inspectRecievedSerialData(char str[100])
       pinMode(10,OUTPUT); // Here we will have to check if the rocket is in the correct stage to allow this
       digitalWrite(10,HIGH);
    }
-  
+   
+   return !(boolPressureValue && boolLaunch);  
 }
 
 
