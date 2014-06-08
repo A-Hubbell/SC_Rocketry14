@@ -130,23 +130,14 @@ void loop()
       Serial.print(", "); 
       Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
       
-      
-  Serial2.print("GPS:ONLINE");
   for(int i =0; i<8; i++)
   {
     Serial2.print(gpsData[i]);
-    Serial2.print("    ");
+    Serial2.print(":");
   }
   
-  Serial2.println(" ");
-      
-      
+  Serial2.println("");      
     }
-    
-//    else
-//    {
-//      Serial.println("NO FIX"); 
-//    }
     
   }
   
