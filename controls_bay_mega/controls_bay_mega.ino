@@ -82,6 +82,12 @@ float altitudeBuffer[ALTITUDE_BUFFER_SIZE]; //Variable to hold consecutive altit
 unsigned long bufferMarker = 0;
 float vertAccel = 0;
 
+String rocketStage = "Launch Mode";
+
+boolean dofStatus = true; // Used to determine if sensor is online or offline
+boolean gpsStatus = true;
+boolean bmpStatuus = true;
+
 const int LED_PIN = 0;
 const int LAUNCH_THRESH = 300; //300 ft altitude detected, switch from mode 1 to mode 2  CHECK WITH HARLEY, METRES OR FEET??
 const int DROGUE_EMATCH_PIN = 2; //Pin connected to drogue parachute e-match
@@ -369,6 +375,53 @@ void inspectRecievedSerialData(char str[100])
 //}
 
 
+void dataXbeeOut()
+{
+  
+  String parseString;
+  if ( dofStatus )
+  {
+    parseString = "DOF:ONLINE";
+    char dtostrfbuffer[15];
+    for(int i = 0; i<7; i++) 
+    {
+      parseString += ":";
+      parseString += dtostrf(dofData[i],8,2, dtostrfbuffer);
+    }
+  }
+    else
+      parseString = "DOF:OFFLINE";
+  Serial2.println(parseString);
+  
+  if ( bmpStatus )
+  {
+    parseString = "BMP:ONLINE";
+    for(int i = 0; i<4; i++)
+    {
+      parseString += ":";
+      parseString += dtostrf(bmpData[i],8,2, dtostrfbuffer);
+    }
+  }
+  else
+    parseString = "BMP:OFFLINE";
+  Serial2.println(parseString);
+
+  if ( gpsStatus )
+  {
+    parseString = "GPS:ONLINE:";
+    for(int i =0; i<10; i++)
+    {
+        parseString += ":";
+        parseString += dtostrf(bmpData[i],8,2, dtostrfbuffer);
+    }
+  }
+  else 
+    parseString = "GPS:OFFLINE
+   Serial2.println(parseString);
+   
+   Serial2.println( "RocketStatus:" + rocketStage );
+  
+}
 
 
 

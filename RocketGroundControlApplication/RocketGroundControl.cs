@@ -76,10 +76,26 @@ namespace WindowsFormsApplication1
                 {
                     setTextDOF();
                 }
+                else if (dataRecievedArray[0] == "RocketStatus")
+                {
+                    setRocketStatus();
+                }
             }
             catch (Exception el)
             {
                // MessageBox.Show(el.InnerException.ToString());
+            }
+        }
+        private void setRocketStatus()
+        {
+            if (this.accelerometerlbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
+            {
+                SetTextCallback d = new SetTextCallback(setRocketStatus);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                rocketstatuslbl.Text = dataRecievedArray[1];
             }
         }
         private void setTextDOF()
@@ -91,29 +107,34 @@ namespace WindowsFormsApplication1
             }
             else
             {
-                if (dataRecievedArray[1] == "Offline")
+                try
                 {
-                    accelerometerlbl.Text = "Offline";
-                    accelerometerlbl.ForeColor = Color.Red;
-                }
-                else
-                {
-                    accelerometerlbl.Text = "Online";
-                    accelerationXlbl.Text = dataRecievedArray[2];
-                    accelerationYlbl.Text = dataRecievedArray[3];
-                    accelerationZlbl.Text = dataRecievedArray[4];
+                    if (dataRecievedArray[1] == "OFFLINE\r")
+                    {
+                        accelerometerlbl.Text = "Offline";
+                        accelerometerlbl.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+                        accelerometerlbl.Text = "Online";
+                        accelerationXlbl.Text = dataRecievedArray[2];
+                        accelerationYlbl.Text = dataRecievedArray[3];
+                        accelerationZlbl.Text = dataRecievedArray[4];
 
-                    velocityXlbl.Text = dataRecievedArray[5];
-                    velocityYlbl.Text = dataRecievedArray[6];
-                    velocityZlbl.Text = dataRecievedArray[7];
-            
-                    accelerometerlbl.ForeColor = Color.Lime;
+                        velocityXlbl.Text = dataRecievedArray[5];
+                        velocityYlbl.Text = dataRecievedArray[6];
+                        velocityZlbl.Text = dataRecievedArray[7];
+
+                        accelerometerlbl.ForeColor = Color.Lime;
+                    }
                 }
+                catch { }
             }
         }
         private void setTextGPS()
         {
-
+           try
+            {
             if (this.gpslbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
             {
                 SetTextCallback d = new SetTextCallback(setTextGPS);
@@ -121,53 +142,59 @@ namespace WindowsFormsApplication1
             }
             else
             {
-                if (dataRecievedArray[1] == "Offline")
-                {
-                    gpslbl.Text = "Offline";
-                    gpslbl.ForeColor = Color.Red;
+
+                    if (dataRecievedArray[1] == "OFFLINE\r")
+                    {
+                        gpslbl.Text = "Offline";
+                        gpslbl.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+                        gpslbl.Text = "Online";
+                        gpsLatlbl.Text = dataRecievedArray[5];
+                        gpsLonglbl.Text = dataRecievedArray[6];
+                        gpslbl.ForeColor = Color.Lime;
+                    }
                 }
-                else
-                {
-                    gpslbl.Text = "Online";
-                    gpsLatlbl.Text = dataRecievedArray[5];
-                    gpsLonglbl.Text = dataRecievedArray[6];
-                    gpslbl.ForeColor = Color.Lime;
-                }
-            }
+                
+            }catch { }
 
         }
         private void setTextBMP()
         {
-            if (this.barometriclbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
+            try
             {
-                SetTextCallback d = new SetTextCallback(setTextBMP);
-                this.Invoke(d, new object[] { });
-            }
-            else
-            {
-                if (dataRecievedArray[1] == "Offline")
+                if (this.barometriclbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
                 {
-                    barometriclbl.Text = "Offline";
-                    barometriclbl.ForeColor = Color.Red;
+                    SetTextCallback d = new SetTextCallback(setTextBMP);
+                    this.Invoke(d, new object[] { });
                 }
                 else
                 {
-                    barometriclbl.Text = "Online";
-                    airpressurelbl.Text = dataRecievedArray[2];
-                    altitudelbl.Text = dataRecievedArray[4];
-                    try
-                    {
 
-                        if (Convert.ToDouble(dataRecievedArray[4].Trim()) > maxAltitude)
-                        {
-                            maxAltitude = Convert.ToDouble(dataRecievedArray[4].Trim());
-                            maxAltitudelbl.Text = maxAltitude.ToString();
-                        }
+                    if (dataRecievedArray[1] == "OFFLINE\r")
+                    {
+                        barometriclbl.Text = "Offline";
+                        barometriclbl.ForeColor = Color.Red;
                     }
-                    catch { };
-                    barometriclbl.ForeColor = Color.Lime;
+                    else
+                    {
+               
+                        barometriclbl.Text = "Online";
+                        airpressurelbl.Text = dataRecievedArray[2];
+                        altitudelbl.Text = dataRecievedArray[4];
+                            if (Convert.ToDouble(dataRecievedArray[4].Trim()) > maxAltitude)
+                            {
+                                maxAltitude = Convert.ToDouble(dataRecievedArray[4].Trim());
+                                maxAltitudelbl.Text = maxAltitude.ToString();
+                            }
+                        }
+                   
+                        barometriclbl.ForeColor = Color.Lime;
+
+                    } 
                 }
-            }
+                catch {}
         }
         private void combutton_Click(object sender, EventArgs e)
         {
