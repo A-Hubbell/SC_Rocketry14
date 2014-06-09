@@ -70,19 +70,11 @@ float altitudeBuffer[ALTITUDE_BUFFER_SIZE]; //Variable to hold consecutive altit
 unsigned long bufferMarker = 0;
 float vertAccel = 0;
 
-<<<<<<< HEAD
 String rocketStage = "Pre-Launch Mode";
 
 boolean dofStatus = true; // Used to determine if sensor is online or offline
 boolean gpsStatus = true;
 boolean bmpStatus = true;
-=======
-String rocketStage = "Launch Mode";
-
-boolean dofStatus = true; // Used to determine if sensor is online or offline
-boolean gpsStatus = true;
-boolean bmpStatuus = true;
->>>>>>> FETCH_HEAD
 
 const int LED_PIN = 0;
 const int LAUNCH_THRESH = 300; //300 ft altitude detected, switch from mode 1 to mode 2  CHECK WITH HARLEY, METRES OR FEET??
@@ -136,81 +128,11 @@ void setup()
 
 }
 
-void split(char inputArray[], char delimiter, float outputArray[])
-{
-	string tempVal = "";
-	string tempArray[10];
-	int count = 0;
-
-	for(int i = 0; i <= strlen(inputArray); i++)
-	{
-		if (inputArray[i] != delimiter) // not delimiter, so append to string
-		{
-			tempVal += inputArray[i];
-      if(i == strlen(inputArray)) // last element, so no delimiter, need this special case
-        tempArray[count] = tempVal;
-		}
-		else
-		{
-			tempArray[count++] = tempVal;	
-			tempVal = ""; //clear val for next
-		}
-	}
-
-	float floatVal;
-	int periodPosition;
-	float divisionFactor;
-
-	for(int i = 0; !tempArray[i].empty(); i++)
-	{
-    floatVal = 0;
-    divisionFactor = 10; //for each value, we divide by an increasing order of 10 so that we can fix it once we have the proper decimal point position
-		periodPosition = tempArray[i].length() - 1; //this allows us to multiply the final float val to the proper value (e.g. 1.2345 becomes 123.45)
-
-		for(int j = 0; j < (tempArray[i].length()); j++)
-		{
-			if(tempArray[i].at(j) == '.')
-			{
-				periodPosition = j - 1;
-			}
-			if(tempArray[i].at(j) >= 48 && tempArray[i].at(j) <= 57)
-			{
-				divisionFactor /= 10;
-
-				floatVal += (float)(tempArray[i].at(j) - 48) * divisionFactor;
-			}	
-		}
-
-		for(int k = 0; k < periodPosition; k++)
-			floatVal *= 10;
-
-			outputArray[i] = floatVal;
-	}
-}
 
 void loop()
 {
-<<<<<<< HEAD
  //Serial.print("before serial 3");
  delay(500); // intial delay for all electronics
-=======
-  
- delay(500); // intial delay for all electronics
- 
- if (Serial.available() > 0 ) // Check for incoming serial data
-  {
-    char dataRecieved[100] = {'\0'};
-    int arraySize = 0;
-    while (Serial.available() > 0) { // While we have serial data read it into an array of characters
-        dataRecieved[arraySize++] = Serial.read();
-        
-    }
-    if(inspectRecievedSerialData(dataRecieved)) // Inspect the data to determine what was recieved and what to do
-	{
-		split(dataReceived, ':', gpsData);
-	}
-  }
->>>>>>> FETCH_HEAD
 
  //----------------------------------------------------------------------------------------------------- 
  //Rocket pre-launch algorithm
@@ -434,57 +356,7 @@ if (Serial3.available() > 0 ) // Check for incoming serial data
   }
 }
 
-<<<<<<< HEAD
 //----------------------------------------------------------------------------------------------------- 
-=======
-void dataXbeeOut()
-{
-  
-  String parseString;
-  if ( dofStatus )
-  {
-    parseString = "DOF:ONLINE";
-    char dtostrfbuffer[15];
-    for(int i = 0; i<7; i++) 
-    {
-      parseString += ":";
-      parseString += dtostrf(dofData[i],8,2, dtostrfbuffer);
-    }
-  }
-    else
-      parseString = "DOF:OFFLINE";
-  Serial2.println(parseString);
-  
-  if ( bmpStatus )
-  {
-    parseString = "BMP:ONLINE";
-    for(int i = 0; i<4; i++)
-    {
-      parseString += ":";
-      parseString += dtostrf(bmpData[i],8,2, dtostrfbuffer);
-    }
-  }
-  else
-    parseString = "BMP:OFFLINE";
-  Serial2.println(parseString);
-
-  if ( gpsStatus )
-  {
-    parseString = "GPS:ONLINE:";
-    for(int i =0; i<10; i++)
-    {
-        parseString += ":";
-        parseString += dtostrf(bmpData[i],8,2, dtostrfbuffer);
-    }
-  }
-  else 
-    parseString = "GPS:OFFLINE
-   Serial2.println(parseString);
-   
-   Serial2.println( "RocketStatus:" + rocketStage );
-  
-}
->>>>>>> FETCH_HEAD
 
 void dataXbeeOut()
 {
