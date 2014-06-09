@@ -30,6 +30,7 @@ namespace WindowsFormsApplication1
         public SerialPort xbeePort; 
         public string[] dataRecievedArray;
         public bool connected = false;
+        public double maxAltitude = 0;
         delegate void SetTextCallback();
         public RocketGroundControl()
         {
@@ -38,106 +39,190 @@ namespace WindowsFormsApplication1
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            string[] ports = SerialPort.GetPortNames();
 
+            Console.WriteLine("The following serial ports were found:");
+
+            // Display each port name to the console. 
+            foreach (string port in ports)
+            {
+                comPortCB.Items.Add(port);
+            }
 
         }
         private void portDataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
             /*
              * data templates
-             BMP sensor  BMP:STATUS:PRESSURE:TEMPERATURE:ALTITUDE
-
+             BMP SENSOR  BMP:STATUS:PRESSURE:TEMPERATURE:ALTITUDE
+             DOF SENSOR  DOF:STATUS:?:?:?:?
+             GPS SENSOR  GPS:STATUS:?:?:?
              */
-            string data = xbeePort.ReadLine();
-
-            dataRecievedArray = data.Split(':'); // Split up each piece of data into an array
-            if (dataRecievedArray[0] == "BMP" && dataRecievedArray.Count() > 4) // Checks if we recieved BMP sensor info format BMP:ONLINE:PRESSURE:TEMPERATURE:ALTITUDE
+            try
             {
-                setTextBMP();
-            }
-            else if (dataRecievedArray[0] == "GPS" && dataRecievedArray.Count() > 10)
-            {
-                setTextGPS();
+                string data = xbeePort.ReadLine();
 
-            }
-            else if (dataRecievedArray[0] == "DOF" && dataRecievedArray.Count() > 9)
-            {
+                dataRecievedArray = data.Split(':'); // Split up each piece of data into an array
+                if (dataRecievedArray[0] == "BMP" ) // Checks if we recieved BMP sensor info format BMP:ONLINE:PRESSURE:TEMPERATURE:ALTITUDE
+                {
+                    setTextBMP();
+                }
+                else if (dataRecievedArray[0] == "GPS" )
+                {
+                    setTextGPS();
 
+                }
+                else if (dataRecievedArray[0] == "DOF" )
+                {
+                    setTextDOF();
+                }
+                else if (dataRecievedArray[0] == "RocketStatus")
+                {
+                    setRocketStatus();
+                }
             }
-           
+            catch (Exception el)
+            {
+               // MessageBox.Show(el.InnerException.ToString());
+            }
+        }
+        private void setRocketStatus()
+        {
+            if (this.accelerometerlbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
+            {
+                SetTextCallback d = new SetTextCallback(setRocketStatus);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                rocketstatuslbl.Text = dataRecievedArray[1];
+            }
+        }
+        private void setTextDOF()
+        {
+            if (this.accelerometerlbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
+            {
+                SetTextCallback d = new SetTextCallback(setTextDOF);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                try
+                {
+                    if (dataRecievedArray[1] == "OFFLINE\r")
+                    {
+                        accelerometerlbl.Text = "Offline";
+                        accelerometerlbl.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+                        accelerometerlbl.Text = "Online";
+                        accelerationXlbl.Text = dataRecievedArray[2];
+                        accelerationYlbl.Text = dataRecievedArray[3];
+                        accelerationZlbl.Text = dataRecievedArray[4];
+
+                        velocityXlbl.Text = dataRecievedArray[5];
+                        velocityYlbl.Text = dataRecievedArray[6];
+                        velocityZlbl.Text = dataRecievedArray[7];
+
+                        accelerometerlbl.ForeColor = Color.Lime;
+                    }
+                }
+                catch { }
+            }
         }
         private void setTextGPS()
         {
-
-            if (this.barometriclbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
+           try
+            {
+            if (this.gpslbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
             {
                 SetTextCallback d = new SetTextCallback(setTextGPS);
                 this.Invoke(d, new object[] { });
             }
             else
             {
-                if (dataRecievedArray[1] == "Offline")
-                {
-                    barometriclbl.Text = "Offline";
-                    barometriclbl.ForeColor = Color.Red;
+
+                    if (dataRecievedArray[1] == "OFFLINE\r")
+                    {
+                        gpslbl.Text = "Offline";
+                        gpslbl.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+                        gpslbl.Text = "Online";
+                        gpsLatlbl.Text = dataRecievedArray[5];
+                        gpsLonglbl.Text = dataRecievedArray[6];
+                        gpslbl.ForeColor = Color.Lime;
+                    }
                 }
-                else
-                {
-                    barometriclbl.Text = "Online";
-                    gpsLatlbl.Text = dataRecievedArray[5];
-                    gpsLonglbl.Text = dataRecievedArray[6];
-                    barometriclbl.ForeColor = Color.Lime;
-                }
-            }
+                
+            }catch { }
 
         }
         private void setTextBMP()
         {
-            if (this.barometriclbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
+            try
             {
-                SetTextCallback d = new SetTextCallback(setTextBMP);
-                this.Invoke(d, new object[] { });
-            }
-            else
-            {
-                if (dataRecievedArray[1] == "Offline")
+                if (this.barometriclbl.InvokeRequired) // Must invoke UI thread to change UI elements since portDataRecieved is on a separate thread
                 {
-                    barometriclbl.Text = "Offline";
-                    barometriclbl.ForeColor = Color.Red;
+                    SetTextCallback d = new SetTextCallback(setTextBMP);
+                    this.Invoke(d, new object[] { });
                 }
                 else
                 {
-                    barometriclbl.Text = "Online";
-                    airpressurelbl.Text = dataRecievedArray[2];
-                    altitudelbl.Text = dataRecievedArray[4];
-                    barometriclbl.ForeColor = Color.Lime;
+
+                    if (dataRecievedArray[1] == "OFFLINE\r")
+                    {
+                        barometriclbl.Text = "Offline";
+                        barometriclbl.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+               
+                        barometriclbl.Text = "Online";
+                        airpressurelbl.Text = dataRecievedArray[2];
+                        altitudelbl.Text = dataRecievedArray[4];
+                            if (Convert.ToDouble(dataRecievedArray[4].Trim()) > maxAltitude)
+                            {
+                                maxAltitude = Convert.ToDouble(dataRecievedArray[4].Trim());
+                                maxAltitudelbl.Text = maxAltitude.ToString();
+                            }
+                        }
+                   
+                        barometriclbl.ForeColor = Color.Lime;
+
+                    } 
                 }
-            }
+                catch {}
         }
         private void combutton_Click(object sender, EventArgs e)
         {
             if (!connected) // Check if connection exists
             {
-                xbeePort = new SerialPort(comtxt.Text, 9600);
-                xbeePort.DtrEnable = false;
-                xbeePort.RtsEnable = false;
                 try
                 {
+                    string selected = (string)comPortCB.SelectedItem;
+                    xbeePort = new SerialPort(selected, 9600);
+                    xbeePort.DtrEnable = false;
+                    xbeePort.RtsEnable = false;
+   
                     xbeePort.Open();
                     connected = true;
                     combutton.Text = "Disconnect";
-                    comtxt.Enabled = false;
+                    comPortCB.Enabled = false;
                     parachuteCheckBox.Enabled = true;
                     parachuteTextBox.Enabled = true;
                     deployButton.Enabled = true;
                     pressureSend.Enabled = true;
                     pressureTextBox.Enabled = true;
+                    xbeePort.DataReceived += new SerialDataReceivedEventHandler(portDataReceived);
                 }
                 catch
                 {
                     MessageBox.Show("Invalid COM xbeePort.");
                 }
-                xbeePort.DataReceived += new SerialDataReceivedEventHandler(portDataReceived);
+                
             }
             else
             {
@@ -147,7 +232,7 @@ namespace WindowsFormsApplication1
                     xbeePort.Close();
                     combutton.Text = "Connect";
                     connected = false;
-                    comtxt.Enabled = true;
+                    comPortCB.Enabled = true;
                     parachuteCheckBox.Enabled = false;
                     parachuteTextBox.Enabled = false;
                     deployButton.Enabled = false;
