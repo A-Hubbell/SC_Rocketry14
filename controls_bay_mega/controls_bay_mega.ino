@@ -14,9 +14,11 @@ BMP180 Pressure Sensor SCL --> Mega SCL (pin 21)
 OpenLog SD Logger RX --> Mega TX1 (pin 18)
 OpenLog SD Logger TX --> Mega RX1 (pin 19)
 
-Xbee RX --> Mega TX2 (pin 16)
-Xbee TX --> Mega RX2 (pin 17)
+Xbee Pro 900 RX --> Mega TX2 (pin 16)
+Xbee Pro 900 TX --> Mega RX2 (pin 17)
 
+Xbee Series 2 Wire RX --> Mega TX3 (pin 14)
+Xbee Series 2 Wire TX --> Mega RX3 (pin 15)
 
 IMPORTANT:
 
@@ -40,13 +42,7 @@ if (parachuteDeploy(2))
   digitalWrite(MAIN_EMATCH_PIN, HIGH);
 }
 
-
-
-
-
 */
-
-
 
 //Libraries
 
@@ -62,25 +58,23 @@ Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(00001);
 /* Assign a unique ID to this sensor at the same time */
 Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(00002);
 
-//Adafruit GPS objects and settings (MOVE TO SENSOR HEADER FILE??)
-//Adafruit_GPS GPS(&Serial);
-//#define GPSECHO  false   //Echo to serial port
-//boolean usingInterrupt = false;   //Manual interrupt to call data
-//void useInterrupt(boolean);
-
-//Timer variable to be used throughout program  (MAKE SURE NOT SAME AS GPS TIMER, IF BEING USED)
-//uint32_t timer = millis();
-
 //Global variables and constants
 
+//This constant determines how many pressure values are averaged for each call of the "parachuteDeploy" function
 const int ALTITUDE_BUFFER_SIZE = 10;
 
 float dofData[9] = {0,0,0,0,0,0,0}; //9 channels (accel xyz, mag xyz, heading, 2 unused)
-float gpsData[8] = {0,0,0,0,0,0,0,0}; // CHANGE to suit number of required data fields 
+String gpsData[8] = {0,0,0,0,0,0,0,0}; // CHANGE to suit number of required data fields 
 float bmpData[4] = {0,0,0,0};  // Altitude  Temperature  Pressure
 float altitudeBuffer[ALTITUDE_BUFFER_SIZE]; //Variable to hold consecutive altitude readings for averaging
 unsigned long bufferMarker = 0;
 float vertAccel = 0;
+
+String rocketStage = "Pre-Launch Mode";
+
+boolean dofStatus = true; // Used to determine if sensor is online or offline
+boolean gpsStatus = true;
+boolean bmpStatus = true;
 
 const int LED_PIN = 0;
 const int LAUNCH_THRESH = 300; //300 ft altitude detected, switch from mode 1 to mode 2  CHECK WITH HARLEY, METRES OR FEET??
@@ -94,15 +88,12 @@ const char PARACHUTE_CODE[10] = "LaunchPar";  // String for determining of sent 
 
 Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(10085);
 
-
-
 uint32_t timer = millis();
 
 float seaLevelPressure = 0.0;
 
 void setup()
 {
-
 
 //-----------------------------------------------------------------------------------------------------
 //PIN INITIALIZATIONS
@@ -111,13 +102,14 @@ void setup()
   pinMode(DROGUE_EMATCH_PIN, OUTPUT);
   pinMode(MAIN_EMATCH_PIN, OUTPUT);
   
-
+  Serial.begin(9600);
 //-----------------------------------------------------------------------------------------------------  
 //SERIAL PORT INITIALIZATIONS 
   
 //Xbee ("Serial2") and SD Logger ("Serial1") communicate at 9600 baud rate, while the GPS ("Serial") uses 115200
   Serial1.begin(9600); //SD Logger
   Serial2.begin(9600); //Xbee  
+  Serial3.begin(9600);
 
 //----------------------------------------------------------------------------------------------------- 
 //BMP180 PRESSURE SENSOR INTIALIZATION
@@ -139,58 +131,51 @@ void setup()
 
 void loop()
 {
- 
-  
+ //Serial.print("before serial 3");
  delay(500); // intial delay for all electronics
- 
- if (Serial.available() > 0 ) // Check for incoming serial data
-  {
-    char dataRecieved[100] = {'\0'};
-    int arraySize = 0;
-    while (Serial.available() > 0) { // While we have serial data read it into an array of characters
-        dataRecieved[arraySize++] = Serial.read();
-        
-    }
-    inspectRecievedSerialData(dataRecieved); // Inspect the data to determine what was recieved and what to do
-  }
 
- 
  //----------------------------------------------------------------------------------------------------- 
  //Rocket pre-launch algorithm
-  do
+  while((avgAltitude() < LAUNCH_THRESH) || bufferMarker <= ALTITUDE_BUFFER_SIZE)
   {
     //Make sure parachutes DO NOT activate
     digitalWrite(DROGUE_EMATCH_PIN, LOW);
     digitalWrite(MAIN_EMATCH_PIN, LOW);
     
-    
+    Serial.print("pre launch");
+    analogWrite(2, 168);
+    //digitalWrite(24, HIGH);
+    delay(10);
     getDOF(); //Read 9-DOF data
     getBMP(); //Read BMP180 data
-    getGPSfromXbee(); //Read GPS data
-    dataSDOut(); //Transmit data to SD logger, then Xbee
+    //dataSDOut(); //Transmit data to SD logger, then Xbee
     dataXbeeOut();
+    checkSerial();
   }
-  while((bmpData[0] < LAUNCH_THRESH) && bufferMarker >= ALTITUDE_BUFFER_SIZE); 
- 
+   
+  rocketStage = "Apogee Detection Mode";
  
  
   //----------------------------------------------------------------------------------------------------- 
   //Drogue parachute deployment algorithm 
   //Read and transmit data from all sensors while vertAccel greater than APOGEE_ACCEL_THRESH
   //Send current HIGH to DROGUE parachute e-match when vertAccel less than or equal to APOGEE_ACCEL_THRESH
-  do
+  while(!parachuteDeploy(1))
   {
     //Make sure parachutes DO NOT activate
     digitalWrite(DROGUE_EMATCH_PIN, LOW);
     digitalWrite(MAIN_EMATCH_PIN, LOW);
-    
+    analogWrite(2,168);
+    //digitalWrite(24, HIGH);
+    delay(10);
     getDOF(); //Read 9-DOF data
     getBMP(); //Read BMP180 data
-    getGPSfromXbee(); //Read GPS data
-    dataSDOut();  //Transmit data to SD logger, then Xbee
+    //dataSDOut();  //Transmit data to SD logger, then Xbee
     dataXbeeOut();
+    //Serial.print("Drogue ");
+    checkSerial();
   }
-  while(!parachuteDeploy(1));
+  
  
  
   // Set drogue chute pin HIGH, output message indicating signal sent and time to SD logger and Xbee
@@ -199,21 +184,26 @@ void loop()
   Serial1.println(timer);
   Serial2.print("DROGUE CHUTE DEPLOYMENT SIGNAL SENT    ");
   Serial2.println(timer);
-  delay(3000) //wait 3 seconds to make sure the high pulse is sent to the EMATCH
+  delay(500); //wait 3 seconds to make sure the high pulse is sent to the EMATCH
+  
+  rocketStage = "Main Para Detect Mode";
   
   //----------------------------------------------------------------------------------------------------- 
   //Main parachute deployment algorithm 
   //Read and transmit data from all sensors while bmpData[0] (rocket altitude) above MAIN_ALT_THRESH altitude
   //Send current HIGH to MAIN parachute e-match when bmpData[0] (rocket altitude) equal to or below MAIN_ALT_THRESH
-  do
+  while(!parachuteDeploy(2))
   {
     getDOF(); //Read 9-DOF data
     getBMP(); //Read BMP180 data
-    getGPS(); //Read GPS data
-    dataSDOut(); //Transmit data to SD logger, then Xbee
+    //getGPS(); //Read GPS data
+    //dataSDOut(); //Transmit data to SD logger, then Xbee
     dataXbeeOut();
+    
+    checkSerial();
+    Serial.println("main para");
   }
-  while(!parachuteDeploy(2));
+  
   
   
   //Set main chute pin HIGH, output message indicating signal sent and time to SD logger and Xbee  
@@ -223,18 +213,23 @@ void loop()
   Serial1.println(timer);
   Serial2.print("MAIN CHUTE DEPLOYMENT SIGNAL SENT    ");
   Serial2.println(timer);
-  delay(3000) //wait 3 seconds to make sure the high pulse is sent to the EMATCH
+  delay(3000); //wait 3 seconds to make sure the high pulse is sent to the EMATCH
+
+  rocketStage = "Passive Descent Mode";
 
   //----------------------------------------------------------------------------------------------------- 
   //Continue logging all sensor data until turned off
  
   while(true)
   {
+    delay(400);
     getDOF(); //Read 9-DOF data
     getBMP(); //Read BMP180 data
-    getGPS(); //Read GPS data
-    dataSDOut(); //Transmit data to SD logger, then Xbee
+    //getGPS(); //Read GPS data
+    //dataSDOut(); //Transmit data to SD logger, then Xbee
     dataXbeeOut();
+    Serial.print("loop");
+    checkSerial();
   } 
  
 
@@ -246,8 +241,24 @@ void loop()
 //CUSTOM FUNCTIONS HERE!!!
 //----------------------------------------------------------------------------------------------------- 
 //----------------------------------------------------------------------------------------------------- 
+float avgAltitude()
+{
+  unsigned long altTotal = 0;
+  
+  
+  //Add up all of the values in altitudeBuffer
+  for(int i=0; i<ALTITUDE_BUFFER_SIZE; i++)
+  {
+    altTotal += altitudeBuffer[i];
+  }
+    
+    return (altTotal/ALTITUDE_BUFFER_SIZE)
+}
+
+
+
 //----------------------------------------------------------------------------------------------------- 
-boolean parachuteDeploy(int parachuteCode)
+bool parachuteDeploy(int parachuteCode)
 {
   
   //If parachuteCode is 1, run DROGUE deployment algorithm
@@ -264,20 +275,12 @@ boolean parachuteDeploy(int parachuteCode)
   }
   
   //If parachuteCode is 2, run MAIN deployment algorithm
-  unsigned long altTotal = 0;
-  
   if(parachuteCode == 2)
   {
-    //MAIN deployment algorithm
-    
-    //Add up all of the values in altitudeBuffer
-    for(int i=0; i<ALTITUDE_BUFFER_SIZE; i++)
-    {
-      altTotal += altitudeBuffer[i];
-    }
-    
-    //If the average of these values is lower than our main parachute altitude threshold, return true
-    if((altTotal/ALTITUDE_BUFFER_SIZE) < MAIN_ALT_THRESH)
+    //MAIN deployment algorithm 
+    //If the average altitude is lower than our main parachute altitude threshold, return true
+    //float currentAlt = avgAltitude(); //Unnecessary? Can avgAltitude() be called in the "if"?
+    if(avgAltitude() < MAIN_ALT_THRESH)
     {
       return true;
     }
@@ -290,12 +293,8 @@ boolean parachuteDeploy(int parachuteCode)
   
 }
 
-
-
-
-
 //-----------------------------------------------------------------------------------------------------
-void inspectRecievedSerialData(char str[100])
+bool inspectRecievedSerialData(char str[100])
 {
   boolean boolPressureValue = true;
   boolean boolLaunch = true;
@@ -325,53 +324,100 @@ void inspectRecievedSerialData(char str[100])
       pinMode(10,OUTPUT); // Here we will have to check if the rocket is in the correct stage to allow this
       digitalWrite(10,HIGH);
    }
-  
+   
+   return !(boolPressureValue && boolLaunch);  
 }
 
 
 //----------------------------------------------------------------------------------------------------- 
-//Data handling functions using
 
+void checkSerial()
+{
+if (Serial3.available() > 0 ) // Check for incoming serial data
+  {
+    Serial.println("in serial3");
+    char dataRecieved[100] = {'\0'};
+    int arraySize = 0;
+    while (Serial3.available() > 0) 
+    { // While we have serial data read it into an array of characters
+        dataRecieved[arraySize++] = Serial3.read();
+    }
+    
+    if(inspectRecievedSerialData(dataRecieved)) // Inspect the data to determine what was recieved and what to do
+    {
+      split(dataRecieved, ':', gpsData);
+    }   
+    
+    for(int i=0;i<arraySize;i++)
+    {
+      Serial.println(dataRecieved[i]);
+    }
+    
+  }
+}
 
-//void dataXbeeOut()
-//{
-//  
-//  //Send all 9-DOF data, 9 channels
-//  for(int i = 0; i<9; i++)
-//  {
-//  Serial2.print(dofData[i]
-//  Serial2.print("    ");
-//  }
-//  
-//  //Each sensor (9dof/bmp180/gps) outputs all of its data on one line and then we go to the next line for the next sensor 
-//  Serial2.println(" ");
-//  
-//  //Send all BMP180 data, 4 channels
-//  for(int i = 0; i<4; i++)
-//  {
-//  Serial2.print(bmpData[i]);
-//  Serial2.print("    ");
-//  }
-//  
-//  
-//  Serial2.println(" ");
-//  
-//  //Send all GPS data, 10 channels
-//  for(int i =0; i<10; i++)
-//  {
-//  Serial2.print(gpsData[i]);
-//  Serial2.print("    ");
-//  }
-//  
-//
-//  Serial2.println(" ");
-//  
-//}
+//----------------------------------------------------------------------------------------------------- 
 
+void dataXbeeOut()
+{
+  
+  String parseString;
+  char dtostrfbuffer[15];
+  
+  if (dofStatus)
+  {
+    parseString = "DOF:ONLINE";
+    
+    for(int i = 0; i<7; i++) 
+    {
+      parseString += ":";
+      parseString += dtostrf(dofData[i],8,2, dtostrfbuffer);
+    }
+  }
+  else
+  { 
+    parseString = "DOF:OFFLINE";
+  }
+  Serial.println(parseString);
+  Serial2.println(parseString);
+  
+  if (bmpStatus)
+  {
+    parseString = "BMP:ONLINE";
+    for(int i = 0; i<4; i++)
+    {
+      parseString += ":";
+      parseString += dtostrf(bmpData[i],8,2, dtostrfbuffer);
+    }
+  }
+  else
+  {
+    parseString = "BMP:OFFLINE";
+  }
+  Serial.println(parseString);
+  Serial2.println(parseString);
 
+  if (gpsStatus)
+  {
+    parseString = "GPS:ONLINE:";
+    for(int i =0; i<8; i++)
+    {
+        parseString += ":";
+        parseString += dtostrf(bmpData[i],8,2, dtostrfbuffer);
+    }
+  }
+  else
+  { 
+    parseString = "GPS:OFFLINE";
+  }
+   Serial.println(parseString);
+   Serial2.println(parseString);
+   
+   Serial2.println( "RocketStatus:" + rocketStage );
+  
+}
 
-
-
+//----------------------------------------------------------------------------------------------------- 
 
 
 void dataSDOut()
@@ -380,8 +426,8 @@ void dataSDOut()
   //Send all 9-DOF data, 9 channels
   for(int i = 0; i<7; i++)
   {
-  Serial1.print(dofData[i]);
-  Serial1.print("    ");
+    Serial1.print(dofData[i]);
+    Serial1.print("    ");
   }
   
   //Each sensor (9dof/bmp180/gps) outputs all of its data on one line and then we go to the next line for the next sensor 
@@ -390,18 +436,18 @@ void dataSDOut()
   //Send all BMP180 data, 4 channels
   for(int i = 0; i<4; i++)
   {
-  Serial1.print(bmpData[i]);
-  Serial1.print("    ");
+    Serial1.print(bmpData[i]);
+    Serial1.print("    ");
   }
   
   
   Serial1.println(" ");
   
   //Send all GPS data, 10 channels
-  for(int i =0; i<10; i++)
+  for(int i =0; i<8; i++)
   {
-  Serial1.print(gpsData[i]);
-  Serial1.print("    ");
+    Serial1.print(gpsData[i]);
+    Serial1.print("    ");
   }
   
 
@@ -410,141 +456,7 @@ void dataSDOut()
 }
 
 
-
-
-void dataXbeeOut()
-{
-//  
-//  //Send all 9-DOF data, 9 channels
-  for(int i = 0; i<7; i++)
-  {
-    Serial2.print(dofData[i]);
-    Serial2.print("    ");
-  }
-  
-//  //Each sensor (9dof/bmp180/gps) outputs all of its data on one line and then we go to the next line for the next sensor 
-//  Serial2.println(" ");
-//  
-//  //Send all BMP180 data, 4 channels
-  Serial2.print("BMP:ONLINE");
-  for(int i = 0; i<4; i++)
-  {
-    Serial2.print(bmpData[i]);
-    Serial2.print(":");
-  }
-//  
-//  
-//  Serial2.println(" ");
-//  
-//  //Send all GPS data, 10 channels
-//  for(int i =0; i<10; i++)
-//  {
-//  Serial2.print(gpsData[i]);
-//  Serial2.print("    ");
-//  }
-//  
-//
-//  Serial2.println(" ");
-//  
-}
-
-
-void getGPS()
-{
-  if (! usingInterrupt) 
-  {
-    // read data from the GPS in the 'main loop'
-    char c = GPS.read();
-  }
-
-  
-  // if a sentence is received, we can check the checksum, parse it...
-  if (GPS.newNMEAreceived()) 
-  {
-    // a tricky thing here is if we print the NMEA sentence, or data
-    // we end up not listening and catching other sentences! 
-    // so be very wary if using OUTPUT_ALLDATA and trytng to print out data
-    //Serial.println(GPS.lastNMEA());   // this also sets the newNMEAreceived() flag to false
-  
-    if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
-      return;  // we can fail to parse a sentence in which case we should just wait for another
-  }
-
-  // if millis() or timer wraps around, we'll just reset it
-  if (timer > millis())  timer = millis();
-
-  
-  // approximately every 2 seconds or so, print out the current stats
-  
-  if (millis() - timer > 2000) 
-  { 
-
-  timer = millis(); // reset the timer
-    
-    Serial.print("\nTime: ");
-    Serial.print(GPS.hour, DEC); Serial.print(':');
-    Serial.print(GPS.minute, DEC); Serial.print(':');
-    Serial.print(GPS.seconds, DEC); Serial.print('.');
-    Serial.println(GPS.milliseconds);
-    if (GPS.fix) 
-    {
-
-      gpsData[0] = GPS.hour;
-      gpsData[1] = GPS.minute;
-      gpsData[2] = GPS.seconds;
-      gpsData[3] = GPS.milliseconds;
-      gpsData[4] = GPS.fix;  //Boolean 1 if there is a satellite fix, 0 if there isn't
-      gpsData[5] = GPS.latitude;
-      gpsData[6] = GPS.longitude;
-      gpsData[7] = GPS.speed;  //Measured in knots
-      gpsData[8] = GPS.altitude;  //Measured in centimeters
-      gpsData[9] = timer;
-      
-      
-      
-    }
-    
-    else
-    {
-      Serial.println("NO FIX"); 
-    }
-    
-  }
-
-}
-
-void setupGPS()
-{
-  GPS.begin(9600);
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY); //Time/location data only
-  // GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);  //Fix data and altitude 
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
-  useInterrupt(true);
-  delay(1000);
-}
-
-
-
-void useInterrupt(boolean v) 
-{
-  if (v) {
-    // Timer0 is already used for millis() - we'll just interrupt somewhere
-    // in the middle and call the "Compare A" function above
-    OCR0A = 0xAF;
-    TIMSK0 |= _BV(OCIE0A);
-    usingInterrupt = true;
-  } else {
-    // do not call the interrupt function COMPA anymore
-    TIMSK0 &= ~_BV(OCIE0A);
-    usingInterrupt = false;
-  }
-}
-
-
-
-
-
-
+//----------------------------------------------------------------------------------------------------- 
 
 
 void getBMP()
@@ -664,5 +576,65 @@ void setupDOF()
  //Code here 
   
 }
+
+
+//-----------------------------------------------------------------------------------------------------
+
+void split(char inputArray[], char delimiter, String outputArray[])
+{
+	String tempVal = "";
+	//String tempArray[10];
+	int count = 0;
+
+        //add no fix
+
+	for(int i = 0; i <= strlen(inputArray); i++)
+	{
+		if (inputArray[i] != delimiter) // not delimiter, so append to string
+		{
+			tempVal += inputArray[i];
+                        if(i == strlen(inputArray)) // last element, so no delimiter, need this special case
+                          outputArray[count] = tempVal;
+		}
+		else
+		{
+			outputArray[count++] = tempVal;	
+			tempVal = ""; //clear val for next
+		}
+	}
+
+	//float floatVal;
+	//int periodPosition;
+	//float divisionFactor;
+
+
+
+//	for(int i = 0; !tempArray[i].empty(); i++)
+//	{
+//    floatVal = 0;
+//    divisionFactor = 10; //for each value, we divide by an increasing order of 10 so that we can fix it once we have the proper decimal point position
+//		periodPosition = tempArray[i].length() - 1; //this allows us to multiply the final float val to the proper value (e.g. 1.2345 becomes 123.45)
+//
+//		for(int j = 0; j < (tempArray[i].length()); j++)
+//		{
+//			if(tempArray[i].at(j) == '.')
+//			{
+//				periodPosition = j - 1;
+//			}
+//			if(tempArray[i].at(j) >= 48 && tempArray[i].at(j) <= 57)
+//			{
+//				divisionFactor /= 10;
+//
+//				floatVal += (float)(tempArray[i].at(j) - 48) * divisionFactor;
+//			}	
+//		}
+//
+//		for(int k = 0; k < periodPosition; k++)
+//			floatVal *= 10;
+//
+//			outputArray[i] = floatVal;
+//	}
+}
+
 
 

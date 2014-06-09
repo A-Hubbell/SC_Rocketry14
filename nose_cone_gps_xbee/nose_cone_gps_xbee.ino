@@ -21,9 +21,9 @@ Connect Xbee DIN (RX)  --> Mega TX2
 #include <Adafruit_GPS.h>
 #include <SoftwareSerial.h>
 
-#define GPSECHO true
+#define GPSECHO false
 
-float gpsData[8] = {0,0,0,0,0,0,0,0}; // CHANGE to suit number of required data fields 
+float gpsData[8] = {0,0,0,0,0,0,0,0}; 
 
 
 boolean usingInterrupt = false;
@@ -34,7 +34,7 @@ Adafruit_GPS GPS(&Serial1);
 
 void setup() 
 {
-  Serial.begin(115200); //GPS serial port
+  Serial1.begin(115200); //GPS serial port
   Serial2.begin(9600); //Xbee serial port
   
   GPS.begin(9600);
@@ -104,11 +104,11 @@ void loop()
 
   timer = millis(); // reset the timer
     
-    Serial.print("\nTime: ");
-    Serial.print(GPS.hour, DEC); Serial.print(':');
-    Serial.print(GPS.minute, DEC); Serial.print(':');
-    Serial.print(GPS.seconds, DEC); Serial.print('.');
-    Serial.println(GPS.milliseconds);
+//    Serial.print("\nTime: ");
+//    Serial.print(GPS.hour, DEC); Serial.print(':');
+//    Serial.print(GPS.minute, DEC); Serial.print(':');
+//    Serial.print(GPS.seconds, DEC); Serial.print('.');
+//    Serial.println(GPS.milliseconds);
     
     if (GPS.fix) 
     {
@@ -117,37 +117,34 @@ void loop()
       gpsData[1] = GPS.minute;
       gpsData[2] = GPS.seconds;
       gpsData[3] = GPS.milliseconds;
-      //gpsData[4] = GPS.fix;  //Boolean 1 if there is a satellite fix, 0 if there isn't
       gpsData[4] = GPS.latitude;
       gpsData[5] = GPS.longitude;
-      //gpsData[6] = GPS.speed;  //Measured in knots
       gpsData[6] = GPS.altitude;  //Measured in centimeters
       gpsData[7] = timer;
       
       //for debugging purposes only
-      Serial.print("Location: ");
-      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
-      Serial.print(", "); 
-      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
-      
-      
-  Serial2.print("GPS:ONLINE");
-  for(int i =0; i<8; i++)
-  {
-    Serial2.print(gpsData[i]);
-    Serial2.print("    ");
-  }
+//      Serial.print("Location:");
+//      Serial.print(GPS.latitude, 4); 
+//      Serial.print(GPS.lat);
+//      Serial.print(":"); 
+//      Serial.print(GPS.longitude, 4); 
+//      Serial.println(GPS.lon);
+
+      for(int i =0; i<8; i++)
+      {
+        Serial2.print(gpsData[i]);
+        Serial2.print(":");
+      }
   
-  Serial2.println(" ");
-      
-      
+      Serial2.println("");      
     }
     
-//    else
-//    {
-//      Serial.println("NO FIX"); 
-//    }
-    
+    else
+    {
+     Serial2.print("NOFIX");
+     //debugging
+     Serial.print("NOFIX");
+    }
   }
   
 }
